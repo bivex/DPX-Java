@@ -202,14 +202,31 @@ class CodeModel:
 
     def all_functions(self) -> list[FunctionModel]:
         res: list[FunctionModel] = []
+        seen: set[tuple[str, str, int]] = set()
         for ns in self.namespaces.values():
-            res.extend(ns.functions.values())
+            for fn in ns.functions.values():
+                key = (fn.name, fn.location.file_path, fn.location.line)
+                if key not in seen:
+                    seen.add(key)
+                    res.append(fn)
             for mm_methods in ns.multimethods.values():
-                res.extend(mm_methods)
+                for fn in mm_methods:
+                    key = (fn.name, fn.location.file_path, fn.location.line)
+                    if key not in seen:
+                        seen.add(key)
+                        res.append(fn)
             for rec in ns.records.values():
-                res.extend(rec.methods)
+                for fn in rec.methods:
+                    key = (fn.name, fn.location.file_path, fn.location.line)
+                    if key not in seen:
+                        seen.add(key)
+                        res.append(fn)
             for ext in ns.extensions:
-                res.extend(ext.methods)
+                for fn in ext.methods:
+                    key = (fn.name, fn.location.file_path, fn.location.line)
+                    if key not in seen:
+                        seen.add(key)
+                        res.append(fn)
         return res
 
     def all_protocols(self) -> list[ProtocolModel]:

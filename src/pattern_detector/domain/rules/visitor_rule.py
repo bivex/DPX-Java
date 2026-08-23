@@ -1,20 +1,19 @@
-"""Visitor Pattern Detection Rule."""
+"""Visitor Pattern Detection Rule for Java."""
 
 from __future__ import annotations
 
 from pattern_detector.domain.code_model import CodeModel
 from pattern_detector.domain.detection import Detection
 from pattern_detector.domain.rules.base import BasePatternRule
-from pattern_detector.domain.value_objects import Evidence, PatternType, SourceLocation
+from pattern_detector.domain.value_objects import Evidence, PatternCategory, PatternType, SourceLocation
 
 
 class VisitorPatternRule(BasePatternRule):
-    """Detects Visitor / Tree Traversal Walker pattern instances in Clojure.
+    """Detects Visitor pattern instances in Java.
 
     Indicators:
-    - Multimethods named `visit`, `accept`, `walk-*`, `transform-node` dispatching on node/type tags.
-    - Protocols defining `accept` or `visit` methods for element hierarchies.
-    - Functions using `clojure.walk` (postwalk, prewalk) to apply visitors across heterogeneous tree structures.
+    - Visitor Interface: An interface declaring overloaded `visit(...)` methods for different element types.
+    - Element Interface / Classes: Interfaces declaring `accept(Visitor v)` and classes invoking `visitor.visit(this)`.
     """
 
     @property
@@ -24,76 +23,69 @@ class VisitorPatternRule(BasePatternRule):
     def detect(self, model: CodeModel) -> list[Detection]:
         detections: list[Detection] = []
 
-        # 1. Multimethod Visitors (e.g. defmulti visit :type / :tag)
-        for ns in model.namespaces.values():
-            for mm_name, methods in ns.multimethods.items():
-                name_lower = mm_name.lower()
-                is_visitor_named = any(k in name_lower for k in ("visit", "walk-", "transform-node", "traverse-"))
+        # 1. Visitor Interfaces declaring visit(...) methods
+        for proto in model.all_protocols():
+            visit_methods = [m for m in proto.methods if "visit" in m.name.lower()]
+            if visit_methods and ("visitor" in proto.name.lower() or len(visit_methods) >= 2):
+                evidences: list[Evidence] = [
+                    self.evidence(
+                        description=f"Interface '{proto.name}' defines Visitor contract with {len(visit_methods)} visit() method overload(s)",
+                        weight=min(0.65, 0.40 + 0.08 * len(visit_methods)),
+                        location=proto.location,
+                        code_suffix="VISITOR_INTERFACE_METHODS",
+                    )
+                ]
 
-                has_tag_dispatch = bool(methods and methods[0].dispatch_fn and any(k in methods[0].dispatch_fn for k in (":type", ":tag", ":op", "class")))
-                if is_visitor_named or (has_tag_dispatch and len(methods) >= 2):
-                    evidences: list[Evidence] = []
-                    related_locs: list[SourceLocation] = []
-
-                    primary_fn = methods[0]
+                # Check concrete visitor implementations
+                visitor_impls = model.find_records_implementing(proto.name)
+                related_locs: list[SourceLocation] = []
+                if visitor_impls:
+                    impl_names = ", ".join(r.name for r in visitor_impls[:4])
                     evidences.append(
                         self.evidence(
-                            description=f"Visitor multimethod '{mm_name}' traverses element hierarchy with polymorphic dispatch",
-                            weight=0.55,
-                            location=primary_fn.location,
-                            code_suffix="VISITOR_MULTIMETHOD",
+                            description=f"Concrete visitor classes implemented: {impl_names}",
+                            weight=0.30,
+                            location=visitor_impls[0].location,
+                            code_suffix="CONCRETE_VISITOR_IMPLEMENTATIONS",
                         )
                     )
+                    related_locs.extend(r.location for r in visitor_impls)
 
-                    branches = [m.dispatch_val for m in methods if m.dispatch_val]
-                    if len(branches) >= 2:
-                        evidences.append(
-                            self.evidence(
-                                description=f"Implements {len(branches)} node type visitor branches: {', '.join(branches[:5])}",
-                                weight=min(0.50, 0.25 + 0.08 * len(branches)),
-                                location=primary_fn.location,
-                                code_suffix="VISITOR_BRANCHES",
-                            )
-                        )
-                        for m in methods:
-                            related_locs.append(m.location)
-
-                    detections.append(
-                        self.create_detection(
-                            target_name=mm_name,
-                            target_kind="visitor_multimethod",
-                            evidences=evidences,
-                            primary_location=primary_fn.location,
-                            related_locations=related_locs,
-                            summary=f"Visitor pattern: multimethod '{mm_name}' visits and transforms {len(branches)} node element types",
-                            base_score=0.25,
-                        )
-                    )
-
-        # 2. Tree Walk Visitor Functions using clojure.walk
-        for fn in model.all_functions():
-            if fn.is_multimethod or fn.parent_multimethod:
-                continue
-            has_walk = any(w in fn.calls for w in ("postwalk", "prewalk", "walk", "clojure.walk/postwalk", "clojure.walk/prewalk"))
-            if has_walk and any(k in fn.name.lower() for k in ("walk", "visit", "transform", "rewrite")):
-                evidences = [
-                    self.evidence(
-                        description=f"Function '{fn.name}' walks and transforms tree structures using clojure.walk visitor traversal",
-                        weight=0.60,
-                        location=fn.location,
-                        code_suffix="CLOJURE_WALK_VISITOR",
-                    ),
-                ]
-                detections.append(
-                    self.create_detection(
-                        target_name=fn.name,
-                        target_kind="tree_walker_fn",
-                        evidences=evidences,
-                        primary_location=fn.location,
-                        related_locations=[],
-                        summary=f"Visitor pattern: '{fn.name}' applies visitor function over hierarchical tree structure",
-                        base_score=0.25,
-                    )
+                detection = self.create_detection(
+                    target_name=proto.name,
+                    target_kind="visitor_interface",
+                    evidences=evidences,
+                    primary_location=proto.location,
+                    related_locations=related_locs,
+                    summary=f"Visitor pattern: '{proto.name}' defines double-dispatch visitor operations over element hierarchy",
+                    base_score=0.35,
                 )
+                detection.pattern_category = PatternCategory.BEHAVIORAL
+                detections.append(detection)
+
+        # 2. Element Accept Methods calling visit(this)
+        for rec in model.all_records():
+            accept_methods = [m for m in rec.methods if "accept" in m.name.lower()]
+            for am in accept_methods:
+                body = am.body_text or ""
+                if "visit(" in body or ".visit" in body:
+                    evidences = [
+                        self.evidence(
+                            description=f"Class '{rec.name}' implements double-dispatch accept() method delegating to visitor.visit(this)",
+                            weight=0.65,
+                            location=am.location,
+                            code_suffix="ELEMENT_ACCEPT_DOUBLE_DISPATCH",
+                        )
+                    ]
+                    detection = self.create_detection(
+                        target_name=f"{rec.name}.{am.name.split('.')[-1]}",
+                        target_kind="element_accept_method",
+                        evidences=evidences,
+                        primary_location=am.location,
+                        summary=f"Visitor Element: '{rec.name}' participates in visitor double-dispatch via accept()",
+                        base_score=0.35,
+                    )
+                    detection.pattern_category = PatternCategory.BEHAVIORAL
+                    detections.append(detection)
 
         return detections

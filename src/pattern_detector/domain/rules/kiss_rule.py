@@ -26,6 +26,10 @@ class KissRule(BasePatternRule):
         detections: list[Detection] = []
 
         for fn in model.all_functions():
+            simple_name = fn.name.split(".")[-1]
+            if simple_name in ("equals", "hashCode", "toString", "compareTo"):
+                continue
+
             # 1. Parameter count check
             max_params = max((len(pl) for pl in fn.parameter_lists), default=0)
             if max_params >= 6:

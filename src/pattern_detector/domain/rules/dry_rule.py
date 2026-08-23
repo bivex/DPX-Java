@@ -48,13 +48,13 @@ class DryRule(BasePatternRule):
                     seen_locs.add(loc_key)
                     unique_instances.append((name, loc))
 
-            if len(unique_instances) >= 2:
+            if len(unique_instances) >= 2 and len({name for name, _ in unique_instances}) >= 2:
                 names = [name for name, _ in unique_instances]
                 locs = [loc for _, loc in unique_instances]
                 evidences = [
                     self.evidence(
-                        description=f"Identical duplicate code logic detected across {len(instances)} methods: {', '.join(names)}",
-                        weight=min(0.70, 0.45 + 0.10 * len(instances)),
+                        description=f"Identical duplicate code logic detected across {len(unique_instances)} methods: {', '.join(names)}",
+                        weight=min(0.70, 0.45 + 0.10 * len(unique_instances)),
                         location=locs[0],
                         code_suffix="DRY_CODE_DUPLICATION",
                     ),
