@@ -36,9 +36,15 @@ class SingleResponsibilityRule(BasePatternRule):
             if rec.name.endswith("Test") or rec.name.endswith("Tests"):
                 continue
 
-            method_names = [m.name.split(".")[-1].lower() for m in rec.methods]
+            # Exclude plain getters, setters, equals, hashCode, toString
+            business_methods = [
+                m for m in rec.methods
+                if not m.name.split(".")[-1].startswith(("get", "set", "is", "has"))
+                and m.name.split(".")[-1] not in ("equals", "hashcode", "tostring")
+            ]
+            method_names = [m.name.split(".")[-1].lower() for m in business_methods]
             fields_count = len(rec.fields)
-            methods_count = len(rec.methods)
+            methods_count = len(business_methods)
 
             # Identify detected concern categories
             matched_concerns: dict[str, list[str]] = {}

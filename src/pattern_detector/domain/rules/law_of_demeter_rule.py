@@ -28,9 +28,13 @@ class LawOfDemeterRule(BasePatternRule):
 
         # Fluent / Stream API method exclusions
         fluent_keywords = {
-            "stream", "filter", "map", "flatmap", "collect", "reduce", "foreach",
-            "builder", "build", "append", "then", "tostring", "trim", "strip",
-            "substring", "replace", "valueof",
+            "stream", "filter", "map", "flatmap", "collect", "reduce", "foreach", "findfirst", "findany",
+            "builder", "build", "append", "then", "tostring", "trim", "strip", "substring", "replace",
+            "valueof", "ofnullable", "orelse", "orelseget", "orelsethrow", "ifpresent", "ispresent",
+            "when", "thenreturn", "thenthrow", "verify", "assertthat", "isequalto", "isnotnull", "istrue",
+            "status", "header", "headers", "body", "ok", "badrequest", "created", "accepted", "notfound",
+            "add", "multiply", "divide", "subtract", "setscale", "plus", "minus", "now", "of", "format",
+            "parse", "join", "equals", "hashcode", "compareto",
         }
 
         for fn in model.all_functions():
