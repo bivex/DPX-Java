@@ -9,6 +9,8 @@ from pattern_detector.domain.detection import Detection
 from pattern_detector.domain.rules.base import BasePatternRule
 from pattern_detector.domain.value_objects import PatternCategory, PatternType
 
+_NEW_EXPR_RE = re.compile(r"\bnew\s+([A-Za-z0-9_]+)\s*\(")
+
 
 class DependencyInversionRule(BasePatternRule):
     """Detects violations and adherences to the Dependency Inversion Principle (DIP).
@@ -40,7 +42,7 @@ class DependencyInversionRule(BasePatternRule):
             concrete_instantiations: list[str] = []
             for m in rec.methods:
                 body = m.body_text or ""
-                news = re.findall(r"\bnew\s+([A-Za-z0-9_]+)\s*\(", body)
+                news = _NEW_EXPR_RE.findall(body)
                 for cl in news:
                     # If instantiating a class ending in Repository, Service, Client, Database, Logger
                     if any(cl.endswith(sfx) for sfx in ("Repository", "Service", "Client", "Database", "Dao", "Gateway", "Sender")):

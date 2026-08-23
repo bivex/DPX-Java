@@ -9,6 +9,8 @@ from pattern_detector.domain.detection import Detection
 from pattern_detector.domain.rules.base import BasePatternRule
 from pattern_detector.domain.value_objects import Evidence, PatternCategory, PatternType
 
+_INSTANCEOF_RE = re.compile(r"\binstanceof\s+([A-Za-z0-9_]+)")
+
 
 class OpenClosedPrincipleRule(BasePatternRule):
     """Detects violations and adherences to the Open/Closed Principle (OCP).
@@ -31,7 +33,7 @@ class OpenClosedPrincipleRule(BasePatternRule):
             if fn.name.split(".")[-1] in ("equals", "compareTo", "toString", "hashCode"):
                 continue
             body = fn.body_text or ""
-            instanceof_matches = re.findall(r"\binstanceof\s+([A-Za-z0-9_]+)", body)
+            instanceof_matches = _INSTANCEOF_RE.findall(body)
             if len(instanceof_matches) >= 2:
                 types_str = ", ".join(instanceof_matches)
                 evidences: list[Evidence] = [

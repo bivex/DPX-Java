@@ -272,9 +272,25 @@ class JavaAntlrParserAdapter(ParserPort):
             states=visitor.states,
         )
 
-    def parse_sources(self, sources: dict[str, str]) -> CodeModel:
+    def parse_sources(self, sources: dict[str, str], max_workers: int | None = None) -> CodeModel:
         model = CodeModel()
-        for file_path, source_code in sources.items():
-            ns = self.parse_source(source_code, file_path=file_path)
-            model.add_namespace(ns)
+        if not sources:
+            return model
+
+        if len(sources) > 3:
+            import os
+            from concurrent.futures import ThreadPoolExecutor
+
+            workers = max_workers or min(16, (os.cpu_count() or 4) * 2)
+            with ThreadPoolExecutor(max_workers=workers) as executor:
+                namespaces = list(
+                    executor.map(lambda item: self.parse_source(item[1], file_path=item[0]), sources.items())
+                )
+                for ns in namespaces:
+                    model.add_namespace(ns)
+        else:
+            for file_path, source_code in sources.items():
+                ns = self.parse_source(source_code, file_path=file_path)
+                model.add_namespace(ns)
+
         return model

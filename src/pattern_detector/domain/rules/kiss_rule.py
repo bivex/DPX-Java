@@ -9,6 +9,8 @@ from pattern_detector.domain.detection import Detection
 from pattern_detector.domain.rules.base import BasePatternRule
 from pattern_detector.domain.value_objects import PatternCategory, PatternType
 
+_BRANCH_RE = re.compile(r"\b(if|else if|while|for|switch|catch|case)\b")
+
 
 class KissRule(BasePatternRule):
     """Detects violations of the KISS principle (excessive complexity).
@@ -61,7 +63,7 @@ class KissRule(BasePatternRule):
 
             # 2. Control flow branching complexity check
             body = fn.body_text or ""
-            branch_keywords = re.findall(r"\b(if|else if|while|for|switch|catch|case)\b", body)
+            branch_keywords = _BRANCH_RE.findall(body)
             if len(branch_keywords) >= 8:
                 evidences = [
                     self.evidence(

@@ -9,6 +9,8 @@ from pattern_detector.domain.detection import Detection
 from pattern_detector.domain.rules.base import BasePatternRule
 from pattern_detector.domain.value_objects import PatternCategory, PatternType
 
+_CHAIN_CALL_RE = re.compile(r"\b([a-zA-Z_][a-zA-Z0-9_]*(?:\.[a-zA-Z_][a-zA-Z0-9_]*\s*\([^)]*\)){2,})")
+
 
 class LawOfDemeterRule(BasePatternRule):
     """Detects violations of the Law of Demeter (Principle of Least Knowledge).
@@ -44,7 +46,7 @@ class LawOfDemeterRule(BasePatternRule):
         for fn in model.all_functions():
             body = fn.body_text or ""
             # Look for expressions with chained method invocations: expr.m1().m2().m3()
-            matches = re.finditer(r"\b([a-zA-Z_][a-zA-Z0-9_]*(?:\.[a-zA-Z_][a-zA-Z0-9_]*\s*\([^)]*\)){2,})", body)
+            matches = _CHAIN_CALL_RE.finditer(body)
 
             for match in matches:
                 chain_snippet = match.group(1).strip()

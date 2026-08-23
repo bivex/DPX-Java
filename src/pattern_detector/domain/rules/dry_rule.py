@@ -10,6 +10,9 @@ from pattern_detector.domain.detection import Detection
 from pattern_detector.domain.rules.base import BasePatternRule
 from pattern_detector.domain.value_objects import PatternCategory, PatternType
 
+_WHITESPACE_RE = re.compile(r"\s+")
+_COMMENT_RE = re.compile(r"//.*")
+
 
 class DryRule(BasePatternRule):
     """Detects structural code duplication violating the DRY (Don't Repeat Yourself) principle.
@@ -33,7 +36,7 @@ class DryRule(BasePatternRule):
                 continue
             body = (fn.body_text or "").strip()
             # Normalize whitespace and comments
-            norm_body = re.sub(r"\s+", " ", re.sub(r"//.*", "", body)).strip()
+            norm_body = _WHITESPACE_RE.sub(" ", _COMMENT_RE.sub("", body)).strip()
             # Check length threshold (non-trivial method > 60 chars)
             if len(norm_body) >= 60 and "return" in norm_body:
                 body_map.setdefault(norm_body, []).append((fn.name, fn.location))
