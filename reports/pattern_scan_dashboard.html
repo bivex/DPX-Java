@@ -80,11 +80,11 @@
         <div class="kpi-grid">
             <div class="kpi-card">
                 <div class="kpi-title">Total Detections</div>
-                <div class="kpi-value">8</div>
+                <div class="kpi-value">17</div>
             </div>
             <div class="kpi-card">
                 <div class="kpi-title">High Confidence (≥70%)</div>
-                <div class="kpi-value" style="color: #4ade80;">8</div>
+                <div class="kpi-value" style="color: #4ade80;">17</div>
             </div>
             <div class="kpi-card">
                 <div class="kpi-title">Med / Low (<70%)</div>
@@ -92,16 +92,16 @@
             </div>
             <div class="kpi-card">
                 <div class="kpi-title">Files Scanned</div>
-                <div class="kpi-value">5</div>
+                <div class="kpi-value">6</div>
             </div>
             <div class="kpi-card">
                 <div class="kpi-title">Scan Duration</div>
-                <div class="kpi-value">0.148s</div>
+                <div class="kpi-value">0.169s</div>
             </div>
         </div>
 
         <div class="category-filters">
-            <button class="cat-filter-btn btn-all" data-filter="all"><strong>All Categories</strong>: 8</button>
+            <button class="cat-filter-btn btn-all" data-filter="all"><strong>All Categories</strong>: 17</button>
             
                     <button class="cat-filter-btn" data-filter="creational" style="border-color: #059669; background: #064e3b44; color: #34d399;">
                         <span class="cat-dot" style="background: #10b981;"></span>
@@ -110,12 +110,17 @@
                     
                     <button class="cat-filter-btn" data-filter="structural" style="border-color: #0284c7; background: #0c4a6e44; color: #38bdf8;">
                         <span class="cat-dot" style="background: #0ea5e9;"></span>
-                        <strong>Structural</strong>: 2
+                        <strong>Structural</strong>: 3
                     </button>
                     
                     <button class="cat-filter-btn" data-filter="behavioral" style="border-color: #9333ea; background: #581c8744; color: #c084fc;">
                         <span class="cat-dot" style="background: #a855f7;"></span>
-                        <strong>Behavioral</strong>: 4
+                        <strong>Behavioral</strong>: 6
+                    </button>
+                    
+                    <button class="cat-filter-btn" data-filter="principle" style="border-color: #4f46e5; background: #312e8144; color: #818cf8;">
+                        <span class="cat-dot" style="background: #6366f1;"></span>
+                        <strong>Principles & SOLID</strong>: 6
                     </button>
                     
         </div>
@@ -178,10 +183,37 @@
                     </div>
                 </div>
                 
-                <div class="pattern-card" data-pattern="singleton" data-category="creational" data-target="INSTANCE" style="border-left: 4px solid #10b981;">
+                <div class="pattern-card" data-pattern="dependency_inversion" data-category="principle" data-target="CheckoutService" style="border-left: 4px solid #6366f1;">
                     <div class="card-header">
                         <div class="header-left">
                             <span class="card-index">#3</span>
+                            <span class="category-badge" style="color: #818cf8; background: #312e8144; border: 1px solid #4f46e5;">
+                                PRINCIPLES &amp; SOLID
+                            </span>
+                            <span class="pattern-badge" style="color: #34d399; background: #064e3b44; border: 1px solid #059669;">
+                                DEPENDENCY_INVERSION
+                            </span>
+                            <span class="target-name">dip_interface_dependency: <strong>CheckoutService</strong></span>
+                        </div>
+                        <span class="confidence-badge badge-h">83% [HIGH]</span>
+                    </div>
+                    <div class="card-body">
+                        <p class="summary-text"><strong>Summary:</strong> DIP Adherence: &#x27;CheckoutService&#x27; depends on interface abstraction(s) (NotificationGateway)</p>
+                        <p class="primary-loc"><strong>Primary Location:</strong> <code>/Volumes/External/Code/DPX-Java/examples/java_samples/PrinciplesAndCleanCodeDemo.java:86:1-96:2</code></p>
+                        <div class="evidence-section">
+                            <strong>Evidence Trail (2 heuristics):</strong>
+                            <ul class="evidence-list">
+                                <li class="evidence-item" style="border-left-color: #6366f1;"><span class="weight-tag" style="color: #818cf8;">+60%</span> <span class="rule-code">[DEPENDENCY_INVERSION_DIP_INJECTED_ABSTRACTION]</span> Class &#x27;CheckoutService&#x27; depends on abstracted interface(s): NotificationGateway adhering to DIP <span class="location-tag">📍 /Volumes/External/Code/DPX-Java/examples/java_samples/PrinciplesAndCleanCodeDemo.java:86:1-96:2</span></li><li class="evidence-item" style="border-left-color: #6366f1;"><span class="weight-tag" style="color: #818cf8;">+35%</span> <span class="rule-code">[DEPENDENCY_INVERSION_DIP_DECOUPLED_ARCHITECTURE]</span> Core domain logic is decoupled from infrastructure details via Dependency Injection <span class="location-tag">📍 /Volumes/External/Code/DPX-Java/examples/java_samples/PrinciplesAndCleanCodeDemo.java:86:1-96:2</span></li>
+                            </ul>
+                        </div>
+                        
+                    </div>
+                </div>
+                
+                <div class="pattern-card" data-pattern="singleton" data-category="creational" data-target="INSTANCE" style="border-left: 4px solid #10b981;">
+                    <div class="card-header">
+                        <div class="header-left">
+                            <span class="card-index">#4</span>
                             <span class="category-badge" style="color: #34d399; background: #064e3b44; border: 1px solid #059669;">
                                 CREATIONAL
                             </span>
@@ -208,7 +240,7 @@
                 <div class="pattern-card" data-pattern="mediator" data-category="behavioral" data-target="EventBroker" style="border-left: 4px solid #a855f7;">
                     <div class="card-header">
                         <div class="header-left">
-                            <span class="card-index">#4</span>
+                            <span class="card-index">#5</span>
                             <span class="category-badge" style="color: #c084fc; background: #581c8744; border: 1px solid #9333ea;">
                                 BEHAVIORAL
                             </span>
@@ -232,10 +264,37 @@
                     </div>
                 </div>
                 
+                <div class="pattern-card" data-pattern="strategy" data-category="behavioral" data-target="TaxCalculator" style="border-left: 4px solid #a855f7;">
+                    <div class="card-header">
+                        <div class="header-left">
+                            <span class="card-index">#6</span>
+                            <span class="category-badge" style="color: #c084fc; background: #581c8744; border: 1px solid #9333ea;">
+                                BEHAVIORAL
+                            </span>
+                            <span class="pattern-badge" style="color: #a78bfa; background: #4c1d9544; border: 1px solid #7c3aed;">
+                                STRATEGY
+                            </span>
+                            <span class="target-name">protocol_strategy: <strong>TaxCalculator</strong></span>
+                        </div>
+                        <span class="confidence-badge badge-h">81% [HIGH]</span>
+                    </div>
+                    <div class="card-body">
+                        <p class="summary-text"><strong>Summary:</strong> Strategy pattern: protocol &#x27;TaxCalculator&#x27; with 3 interchangeable concrete implementations</p>
+                        <p class="primary-loc"><strong>Primary Location:</strong> <code>/Volumes/External/Code/DPX-Java/examples/java_samples/PrinciplesAndCleanCodeDemo.java:24:1-26:2</code></p>
+                        <div class="evidence-section">
+                            <strong>Evidence Trail (4 heuristics):</strong>
+                            <ul class="evidence-list">
+                                <li class="evidence-item" style="border-left-color: #a855f7;"><span class="weight-tag" style="color: #c084fc;">+45%</span> <span class="rule-code">[STRATEGY_PROTOCOL_STRATEGY_INTERFACE]</span> Protocol &#x27;TaxCalculator&#x27; defines strategy interface with methods: calculateTax <span class="location-tag">📍 /Volumes/External/Code/DPX-Java/examples/java_samples/PrinciplesAndCleanCodeDemo.java:24:1-26:2</span></li><li class="evidence-item" style="border-left-color: #a855f7;"><span class="weight-tag" style="color: #c084fc;">+25%</span> <span class="rule-code">[STRATEGY_RECORD_STRATEGY_IMPL]</span> Record &#x27;StandardTaxCalculator&#x27; provides concrete strategy implementation for protocol &#x27;TaxCalculator&#x27; <span class="location-tag">📍 /Volumes/External/Code/DPX-Java/examples/java_samples/PrinciplesAndCleanCodeDemo.java:28:1-32:2</span></li><li class="evidence-item" style="border-left-color: #a855f7;"><span class="weight-tag" style="color: #c084fc;">+25%</span> <span class="rule-code">[STRATEGY_RECORD_STRATEGY_IMPL]</span> Record &#x27;ReducedTaxCalculator&#x27; provides concrete strategy implementation for protocol &#x27;TaxCalculator&#x27; <span class="location-tag">📍 /Volumes/External/Code/DPX-Java/examples/java_samples/PrinciplesAndCleanCodeDemo.java:34:1-38:2</span></li><li class="evidence-item" style="border-left-color: #a855f7;"><span class="weight-tag" style="color: #c084fc;">+25%</span> <span class="rule-code">[STRATEGY_RECORD_STRATEGY_IMPL]</span> Record &#x27;ZeroTaxCalculator&#x27; provides concrete strategy implementation for protocol &#x27;TaxCalculator&#x27; <span class="location-tag">📍 /Volumes/External/Code/DPX-Java/examples/java_samples/PrinciplesAndCleanCodeDemo.java:40:1-44:2</span></li>
+                            </ul>
+                        </div>
+                        <div class="related-locs"><strong>Related Locations:</strong><ul><li><code>/Volumes/External/Code/DPX-Java/examples/java_samples/PrinciplesAndCleanCodeDemo.java:28:1-32:2</code></li><li><code>/Volumes/External/Code/DPX-Java/examples/java_samples/PrinciplesAndCleanCodeDemo.java:34:1-38:2</code></li><li><code>/Volumes/External/Code/DPX-Java/examples/java_samples/PrinciplesAndCleanCodeDemo.java:40:1-44:2</code></li></ul></div>
+                    </div>
+                </div>
+                
                 <div class="pattern-card" data-pattern="bridge" data-category="structural" data-target="DocumentRepository" style="border-left: 4px solid #0ea5e9;">
                     <div class="card-header">
                         <div class="header-left">
-                            <span class="card-index">#5</span>
+                            <span class="card-index">#7</span>
                             <span class="category-badge" style="color: #38bdf8; background: #0c4a6e44; border: 1px solid #0284c7;">
                                 STRUCTURAL
                             </span>
@@ -259,10 +318,64 @@
                     </div>
                 </div>
                 
+                <div class="pattern-card" data-pattern="bridge" data-category="structural" data-target="PaymentProcessor" style="border-left: 4px solid #0ea5e9;">
+                    <div class="card-header">
+                        <div class="header-left">
+                            <span class="card-index">#8</span>
+                            <span class="category-badge" style="color: #38bdf8; background: #0c4a6e44; border: 1px solid #0284c7;">
+                                STRUCTURAL
+                            </span>
+                            <span class="pattern-badge" style="color: #67e8f9; background: #164e6344; border: 1px solid #0891b2;">
+                                BRIDGE
+                            </span>
+                            <span class="target-name">bridge_abstraction: <strong>PaymentProcessor</strong></span>
+                        </div>
+                        <span class="confidence-badge badge-h">81% [HIGH]</span>
+                    </div>
+                    <div class="card-body">
+                        <p class="summary-text"><strong>Summary:</strong> Bridge pattern: abstraction record &#x27;PaymentProcessor&#x27; decouples domain logic from &#x27;StorageEngineDriver&#x27; backend implementation</p>
+                        <p class="primary-loc"><strong>Primary Location:</strong> <code>/Volumes/External/Code/DPX-Java/examples/java_samples/PrinciplesAndCleanCodeDemo.java:107:1-113:2</code></p>
+                        <div class="evidence-section">
+                            <strong>Evidence Trail (2 heuristics):</strong>
+                            <ul class="evidence-list">
+                                <li class="evidence-item" style="border-left-color: #0ea5e9;"><span class="weight-tag" style="color: #38bdf8;">+55%</span> <span class="rule-code">[BRIDGE_BRIDGE_ABSTRACTION_RECORD]</span> Record &#x27;PaymentProcessor&#x27; maintains decoupled bridge reference to implementation driver field: logEngine <span class="location-tag">📍 /Volumes/External/Code/DPX-Java/examples/java_samples/PrinciplesAndCleanCodeDemo.java:107:1-113:2</span></li><li class="evidence-item" style="border-left-color: #0ea5e9;"><span class="weight-tag" style="color: #38bdf8;">+40%</span> <span class="rule-code">[BRIDGE_BRIDGE_DRIVER_PROTOCOL]</span> Driver implementation protocol &#x27;StorageEngineDriver&#x27; defines concrete backend interface <span class="location-tag">📍 /Volumes/External/Code/DPX-Java/examples/java_samples/StructuralPatternsDemo.java:39:1-42:2</span></li>
+                            </ul>
+                        </div>
+                        <div class="related-locs"><strong>Related Locations:</strong><ul><li><code>/Volumes/External/Code/DPX-Java/examples/java_samples/StructuralPatternsDemo.java:39:1-42:2</code></li></ul></div>
+                    </div>
+                </div>
+                
+                <div class="pattern-card" data-pattern="open_closed" data-category="principle" data-target="TaxCalculator" style="border-left: 4px solid #6366f1;">
+                    <div class="card-header">
+                        <div class="header-left">
+                            <span class="card-index">#9</span>
+                            <span class="category-badge" style="color: #818cf8; background: #312e8144; border: 1px solid #4f46e5;">
+                                PRINCIPLES &amp; SOLID
+                            </span>
+                            <span class="pattern-badge" style="color: #a78bfa; background: #4c1d9544; border: 1px solid #7c3aed;">
+                                OPEN_CLOSED
+                            </span>
+                            <span class="target-name">ocp_polymorphic_hierarchy: <strong>TaxCalculator</strong></span>
+                        </div>
+                        <span class="confidence-badge badge-h">78% [HIGH]</span>
+                    </div>
+                    <div class="card-body">
+                        <p class="summary-text"><strong>Summary:</strong> OCP Adherence: Interface &#x27;TaxCalculator&#x27; provides polymorphic extensibility across 3 classes</p>
+                        <p class="primary-loc"><strong>Primary Location:</strong> <code>/Volumes/External/Code/DPX-Java/examples/java_samples/PrinciplesAndCleanCodeDemo.java:24:1-26:2</code></p>
+                        <div class="evidence-section">
+                            <strong>Evidence Trail (2 heuristics):</strong>
+                            <ul class="evidence-list">
+                                <li class="evidence-item" style="border-left-color: #6366f1;"><span class="weight-tag" style="color: #818cf8;">+55%</span> <span class="rule-code">[OPEN_CLOSED_OCP_POLYMORPHIC_EXTENSION]</span> Interface &#x27;TaxCalculator&#x27; is open for extension with 3 polymorphic implementations: StandardTaxCalculator, ReducedTaxCalculator, ZeroTaxCalculator <span class="location-tag">📍 /Volumes/External/Code/DPX-Java/examples/java_samples/PrinciplesAndCleanCodeDemo.java:24:1-26:2</span></li><li class="evidence-item" style="border-left-color: #6366f1;"><span class="weight-tag" style="color: #818cf8;">+30%</span> <span class="rule-code">[OPEN_CLOSED_OCP_CLOSED_CONTRACT]</span> Standard contract defines 1 methods without requiring caller modifications <span class="location-tag">📍 /Volumes/External/Code/DPX-Java/examples/java_samples/PrinciplesAndCleanCodeDemo.java:24:1-26:2</span></li>
+                            </ul>
+                        </div>
+                        <div class="related-locs"><strong>Related Locations:</strong><ul><li><code>/Volumes/External/Code/DPX-Java/examples/java_samples/PrinciplesAndCleanCodeDemo.java:28:1-32:2</code></li><li><code>/Volumes/External/Code/DPX-Java/examples/java_samples/PrinciplesAndCleanCodeDemo.java:34:1-38:2</code></li><li><code>/Volumes/External/Code/DPX-Java/examples/java_samples/PrinciplesAndCleanCodeDemo.java:40:1-44:2</code></li></ul></div>
+                    </div>
+                </div>
+                
                 <div class="pattern-card" data-pattern="strategy" data-category="behavioral" data-target="PaymentStrategy" style="border-left: 4px solid #a855f7;">
                     <div class="card-header">
                         <div class="header-left">
-                            <span class="card-index">#6</span>
+                            <span class="card-index">#10</span>
                             <span class="category-badge" style="color: #c084fc; background: #581c8744; border: 1px solid #9333ea;">
                                 BEHAVIORAL
                             </span>
@@ -289,7 +402,7 @@
                 <div class="pattern-card" data-pattern="strategy" data-category="behavioral" data-target="GraphicComponent" style="border-left: 4px solid #a855f7;">
                     <div class="card-header">
                         <div class="header-left">
-                            <span class="card-index">#7</span>
+                            <span class="card-index">#11</span>
                             <span class="category-badge" style="color: #c084fc; background: #581c8744; border: 1px solid #9333ea;">
                                 BEHAVIORAL
                             </span>
@@ -313,10 +426,37 @@
                     </div>
                 </div>
                 
+                <div class="pattern-card" data-pattern="strategy" data-category="behavioral" data-target="Printable" style="border-left: 4px solid #a855f7;">
+                    <div class="card-header">
+                        <div class="header-left">
+                            <span class="card-index">#12</span>
+                            <span class="category-badge" style="color: #c084fc; background: #581c8744; border: 1px solid #9333ea;">
+                                BEHAVIORAL
+                            </span>
+                            <span class="pattern-badge" style="color: #a78bfa; background: #4c1d9544; border: 1px solid #7c3aed;">
+                                STRATEGY
+                            </span>
+                            <span class="target-name">protocol_strategy: <strong>Printable</strong></span>
+                        </div>
+                        <span class="confidence-badge badge-h">75% [HIGH]</span>
+                    </div>
+                    <div class="card-body">
+                        <p class="summary-text"><strong>Summary:</strong> Strategy pattern: protocol &#x27;Printable&#x27; with 2 interchangeable concrete implementations</p>
+                        <p class="primary-loc"><strong>Primary Location:</strong> <code>/Volumes/External/Code/DPX-Java/examples/java_samples/PrinciplesAndCleanCodeDemo.java:49:1-51:2</code></p>
+                        <div class="evidence-section">
+                            <strong>Evidence Trail (3 heuristics):</strong>
+                            <ul class="evidence-list">
+                                <li class="evidence-item" style="border-left-color: #a855f7;"><span class="weight-tag" style="color: #c084fc;">+45%</span> <span class="rule-code">[STRATEGY_PROTOCOL_STRATEGY_INTERFACE]</span> Protocol &#x27;Printable&#x27; defines strategy interface with methods: print <span class="location-tag">📍 /Volumes/External/Code/DPX-Java/examples/java_samples/PrinciplesAndCleanCodeDemo.java:49:1-51:2</span></li><li class="evidence-item" style="border-left-color: #a855f7;"><span class="weight-tag" style="color: #c084fc;">+25%</span> <span class="rule-code">[STRATEGY_RECORD_STRATEGY_IMPL]</span> Record &#x27;InvoiceDocument&#x27; provides concrete strategy implementation for protocol &#x27;Printable&#x27; <span class="location-tag">📍 /Volumes/External/Code/DPX-Java/examples/java_samples/PrinciplesAndCleanCodeDemo.java:57:1-65:2</span></li><li class="evidence-item" style="border-left-color: #a855f7;"><span class="weight-tag" style="color: #c084fc;">+25%</span> <span class="rule-code">[STRATEGY_RECORD_STRATEGY_IMPL]</span> Record &#x27;SummaryDocument&#x27; provides concrete strategy implementation for protocol &#x27;Printable&#x27; <span class="location-tag">📍 /Volumes/External/Code/DPX-Java/examples/java_samples/PrinciplesAndCleanCodeDemo.java:67:1-71:2</span></li>
+                            </ul>
+                        </div>
+                        <div class="related-locs"><strong>Related Locations:</strong><ul><li><code>/Volumes/External/Code/DPX-Java/examples/java_samples/PrinciplesAndCleanCodeDemo.java:57:1-65:2</code></li><li><code>/Volumes/External/Code/DPX-Java/examples/java_samples/PrinciplesAndCleanCodeDemo.java:67:1-71:2</code></li></ul></div>
+                    </div>
+                </div>
+                
                 <div class="pattern-card" data-pattern="mediator" data-category="behavioral" data-target="CentralMessageHub" style="border-left: 4px solid #a855f7;">
                     <div class="card-header">
                         <div class="header-left">
-                            <span class="card-index">#8</span>
+                            <span class="card-index">#13</span>
                             <span class="category-badge" style="color: #c084fc; background: #581c8744; border: 1px solid #9333ea;">
                                 BEHAVIORAL
                             </span>
@@ -337,6 +477,114 @@
                             </ul>
                         </div>
                         
+                    </div>
+                </div>
+                
+                <div class="pattern-card" data-pattern="interface_segregation" data-category="principle" data-target="PaymentStrategy" style="border-left: 4px solid #6366f1;">
+                    <div class="card-header">
+                        <div class="header-left">
+                            <span class="card-index">#14</span>
+                            <span class="category-badge" style="color: #818cf8; background: #312e8144; border: 1px solid #4f46e5;">
+                                PRINCIPLES &amp; SOLID
+                            </span>
+                            <span class="pattern-badge" style="color: #38bdf8; background: #0c4a6e44; border: 1px solid #0284c7;">
+                                INTERFACE_SEGREGATION
+                            </span>
+                            <span class="target-name">segregated_role_interface: <strong>PaymentStrategy</strong></span>
+                        </div>
+                        <span class="confidence-badge badge-h">75% [HIGH]</span>
+                    </div>
+                    <div class="card-body">
+                        <p class="summary-text"><strong>Summary:</strong> ISP Adherence: Role interface &#x27;PaymentStrategy&#x27; is segregated and focused (1 methods)</p>
+                        <p class="primary-loc"><strong>Primary Location:</strong> <code>/Volumes/External/Code/DPX-Java/examples/java_samples/BehavioralPatternsDemo.java:6:1-8:2</code></p>
+                        <div class="evidence-section">
+                            <strong>Evidence Trail (2 heuristics):</strong>
+                            <ul class="evidence-list">
+                                <li class="evidence-item" style="border-left-color: #6366f1;"><span class="weight-tag" style="color: #818cf8;">+50%</span> <span class="rule-code">[INTERFACE_SEGREGATION_ISP_ROLE_INTERFACE]</span> Interface &#x27;PaymentStrategy&#x27; follows ISP as a cohesive role interface with only 1 method(s) <span class="location-tag">📍 /Volumes/External/Code/DPX-Java/examples/java_samples/BehavioralPatternsDemo.java:6:1-8:2</span></li><li class="evidence-item" style="border-left-color: #6366f1;"><span class="weight-tag" style="color: #818cf8;">+30%</span> <span class="rule-code">[INTERFACE_SEGREGATION_ISP_CLEAN_IMPLEMENTATION]</span> Implemented by 2 targeted classes without bloated contract obligations <span class="location-tag">📍 /Volumes/External/Code/DPX-Java/examples/java_samples/BehavioralPatternsDemo.java:6:1-8:2</span></li>
+                            </ul>
+                        </div>
+                        <div class="related-locs"><strong>Related Locations:</strong><ul><li><code>/Volumes/External/Code/DPX-Java/examples/java_samples/BehavioralPatternsDemo.java:10:1-14:2</code></li><li><code>/Volumes/External/Code/DPX-Java/examples/java_samples/BehavioralPatternsDemo.java:16:1-20:2</code></li></ul></div>
+                    </div>
+                </div>
+                
+                <div class="pattern-card" data-pattern="interface_segregation" data-category="principle" data-target="GraphicComponent" style="border-left: 4px solid #6366f1;">
+                    <div class="card-header">
+                        <div class="header-left">
+                            <span class="card-index">#15</span>
+                            <span class="category-badge" style="color: #818cf8; background: #312e8144; border: 1px solid #4f46e5;">
+                                PRINCIPLES &amp; SOLID
+                            </span>
+                            <span class="pattern-badge" style="color: #38bdf8; background: #0c4a6e44; border: 1px solid #0284c7;">
+                                INTERFACE_SEGREGATION
+                            </span>
+                            <span class="target-name">segregated_role_interface: <strong>GraphicComponent</strong></span>
+                        </div>
+                        <span class="confidence-badge badge-h">75% [HIGH]</span>
+                    </div>
+                    <div class="card-body">
+                        <p class="summary-text"><strong>Summary:</strong> ISP Adherence: Role interface &#x27;GraphicComponent&#x27; is segregated and focused (1 methods)</p>
+                        <p class="primary-loc"><strong>Primary Location:</strong> <code>/Volumes/External/Code/DPX-Java/examples/java_samples/StructuralPatternsDemo.java:9:1-11:2</code></p>
+                        <div class="evidence-section">
+                            <strong>Evidence Trail (2 heuristics):</strong>
+                            <ul class="evidence-list">
+                                <li class="evidence-item" style="border-left-color: #6366f1;"><span class="weight-tag" style="color: #818cf8;">+50%</span> <span class="rule-code">[INTERFACE_SEGREGATION_ISP_ROLE_INTERFACE]</span> Interface &#x27;GraphicComponent&#x27; follows ISP as a cohesive role interface with only 1 method(s) <span class="location-tag">📍 /Volumes/External/Code/DPX-Java/examples/java_samples/StructuralPatternsDemo.java:9:1-11:2</span></li><li class="evidence-item" style="border-left-color: #6366f1;"><span class="weight-tag" style="color: #818cf8;">+30%</span> <span class="rule-code">[INTERFACE_SEGREGATION_ISP_CLEAN_IMPLEMENTATION]</span> Implemented by 2 targeted classes without bloated contract obligations <span class="location-tag">📍 /Volumes/External/Code/DPX-Java/examples/java_samples/StructuralPatternsDemo.java:9:1-11:2</span></li>
+                            </ul>
+                        </div>
+                        <div class="related-locs"><strong>Related Locations:</strong><ul><li><code>/Volumes/External/Code/DPX-Java/examples/java_samples/StructuralPatternsDemo.java:13:1-20:2</code></li><li><code>/Volumes/External/Code/DPX-Java/examples/java_samples/StructuralPatternsDemo.java:22:1-34:2</code></li></ul></div>
+                    </div>
+                </div>
+                
+                <div class="pattern-card" data-pattern="interface_segregation" data-category="principle" data-target="TaxCalculator" style="border-left: 4px solid #6366f1;">
+                    <div class="card-header">
+                        <div class="header-left">
+                            <span class="card-index">#16</span>
+                            <span class="category-badge" style="color: #818cf8; background: #312e8144; border: 1px solid #4f46e5;">
+                                PRINCIPLES &amp; SOLID
+                            </span>
+                            <span class="pattern-badge" style="color: #38bdf8; background: #0c4a6e44; border: 1px solid #0284c7;">
+                                INTERFACE_SEGREGATION
+                            </span>
+                            <span class="target-name">segregated_role_interface: <strong>TaxCalculator</strong></span>
+                        </div>
+                        <span class="confidence-badge badge-h">75% [HIGH]</span>
+                    </div>
+                    <div class="card-body">
+                        <p class="summary-text"><strong>Summary:</strong> ISP Adherence: Role interface &#x27;TaxCalculator&#x27; is segregated and focused (1 methods)</p>
+                        <p class="primary-loc"><strong>Primary Location:</strong> <code>/Volumes/External/Code/DPX-Java/examples/java_samples/PrinciplesAndCleanCodeDemo.java:24:1-26:2</code></p>
+                        <div class="evidence-section">
+                            <strong>Evidence Trail (2 heuristics):</strong>
+                            <ul class="evidence-list">
+                                <li class="evidence-item" style="border-left-color: #6366f1;"><span class="weight-tag" style="color: #818cf8;">+50%</span> <span class="rule-code">[INTERFACE_SEGREGATION_ISP_ROLE_INTERFACE]</span> Interface &#x27;TaxCalculator&#x27; follows ISP as a cohesive role interface with only 1 method(s) <span class="location-tag">📍 /Volumes/External/Code/DPX-Java/examples/java_samples/PrinciplesAndCleanCodeDemo.java:24:1-26:2</span></li><li class="evidence-item" style="border-left-color: #6366f1;"><span class="weight-tag" style="color: #818cf8;">+30%</span> <span class="rule-code">[INTERFACE_SEGREGATION_ISP_CLEAN_IMPLEMENTATION]</span> Implemented by 3 targeted classes without bloated contract obligations <span class="location-tag">📍 /Volumes/External/Code/DPX-Java/examples/java_samples/PrinciplesAndCleanCodeDemo.java:24:1-26:2</span></li>
+                            </ul>
+                        </div>
+                        <div class="related-locs"><strong>Related Locations:</strong><ul><li><code>/Volumes/External/Code/DPX-Java/examples/java_samples/PrinciplesAndCleanCodeDemo.java:28:1-32:2</code></li><li><code>/Volumes/External/Code/DPX-Java/examples/java_samples/PrinciplesAndCleanCodeDemo.java:34:1-38:2</code></li><li><code>/Volumes/External/Code/DPX-Java/examples/java_samples/PrinciplesAndCleanCodeDemo.java:40:1-44:2</code></li></ul></div>
+                    </div>
+                </div>
+                
+                <div class="pattern-card" data-pattern="interface_segregation" data-category="principle" data-target="Printable" style="border-left: 4px solid #6366f1;">
+                    <div class="card-header">
+                        <div class="header-left">
+                            <span class="card-index">#17</span>
+                            <span class="category-badge" style="color: #818cf8; background: #312e8144; border: 1px solid #4f46e5;">
+                                PRINCIPLES &amp; SOLID
+                            </span>
+                            <span class="pattern-badge" style="color: #38bdf8; background: #0c4a6e44; border: 1px solid #0284c7;">
+                                INTERFACE_SEGREGATION
+                            </span>
+                            <span class="target-name">segregated_role_interface: <strong>Printable</strong></span>
+                        </div>
+                        <span class="confidence-badge badge-h">75% [HIGH]</span>
+                    </div>
+                    <div class="card-body">
+                        <p class="summary-text"><strong>Summary:</strong> ISP Adherence: Role interface &#x27;Printable&#x27; is segregated and focused (1 methods)</p>
+                        <p class="primary-loc"><strong>Primary Location:</strong> <code>/Volumes/External/Code/DPX-Java/examples/java_samples/PrinciplesAndCleanCodeDemo.java:49:1-51:2</code></p>
+                        <div class="evidence-section">
+                            <strong>Evidence Trail (2 heuristics):</strong>
+                            <ul class="evidence-list">
+                                <li class="evidence-item" style="border-left-color: #6366f1;"><span class="weight-tag" style="color: #818cf8;">+50%</span> <span class="rule-code">[INTERFACE_SEGREGATION_ISP_ROLE_INTERFACE]</span> Interface &#x27;Printable&#x27; follows ISP as a cohesive role interface with only 1 method(s) <span class="location-tag">📍 /Volumes/External/Code/DPX-Java/examples/java_samples/PrinciplesAndCleanCodeDemo.java:49:1-51:2</span></li><li class="evidence-item" style="border-left-color: #6366f1;"><span class="weight-tag" style="color: #818cf8;">+30%</span> <span class="rule-code">[INTERFACE_SEGREGATION_ISP_CLEAN_IMPLEMENTATION]</span> Implemented by 2 targeted classes without bloated contract obligations <span class="location-tag">📍 /Volumes/External/Code/DPX-Java/examples/java_samples/PrinciplesAndCleanCodeDemo.java:49:1-51:2</span></li>
+                            </ul>
+                        </div>
+                        <div class="related-locs"><strong>Related Locations:</strong><ul><li><code>/Volumes/External/Code/DPX-Java/examples/java_samples/PrinciplesAndCleanCodeDemo.java:57:1-65:2</code></li><li><code>/Volumes/External/Code/DPX-Java/examples/java_samples/PrinciplesAndCleanCodeDemo.java:67:1-71:2</code></li></ul></div>
                     </div>
                 </div>
                 

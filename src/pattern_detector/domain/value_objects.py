@@ -7,17 +7,18 @@ from enum import Enum
 
 
 class PatternCategory(str, Enum):
-    """Broad classification of design patterns."""
+    """Broad classification of design patterns and engineering principles."""
 
     CREATIONAL = "creational"
     STRUCTURAL = "structural"
     BEHAVIORAL = "behavioral"
     ARCHITECTURAL = "architectural"
     CONCURRENCY = "concurrency"
+    PRINCIPLE = "principle"
 
 
 class PatternType(str, Enum):
-    """Specific design pattern identifiers."""
+    """Specific design pattern and engineering principle identifiers."""
 
     # Creational
     SINGLETON = "singleton"
@@ -48,11 +49,23 @@ class PatternType(str, Enum):
     VISITOR = "visitor"
     INTERPRETER = "interpreter"
 
-    # Idiomatic & Functional Architecture
+    # Architectural & Clean Architecture
     LIFECYCLE_COMPONENT = "lifecycle_component"
     MIDDLEWARE_PIPELINE = "middleware_pipeline"
     MULTIMETHOD_DISPATCH = "multimethod_dispatch"
     CIRCULAR_DEPENDENCY = "circular_dependency"
+
+    # SOLID & Engineering Principles
+    SINGLE_RESPONSIBILITY = "single_responsibility"
+    OPEN_CLOSED = "open_closed"
+    LISKOV_SUBSTITUTION = "liskov_substitution"
+    INTERFACE_SEGREGATION = "interface_segregation"
+    DEPENDENCY_INVERSION = "dependency_inversion"
+    COMPOSITION_OVER_INHERITANCE = "composition_over_inheritance"
+    LAW_OF_DEMETER = "law_of_demeter"
+    HIGH_COHESION_LOW_COUPLING = "high_cohesion_low_coupling"
+    KISS = "kiss"
+    DRY = "dry"
 
 
 class ConfidenceLevel(str, Enum):

@@ -44,6 +44,13 @@ CATEGORY_COLORS: dict[PatternCategory, dict[str, str]] = {
         "accent": "#f43f5e",
         "name": "Concurrency",
     },
+    PatternCategory.PRINCIPLE: {
+        "text": "#818cf8",
+        "bg": "#312e8144",
+        "border": "#4f46e5",
+        "accent": "#6366f1",
+        "name": "Principles & SOLID",
+    },
 }
 
 PATTERN_TYPE_COLORS: dict[PatternType, dict[str, str]] = {
@@ -72,6 +79,16 @@ PATTERN_TYPE_COLORS: dict[PatternType, dict[str, str]] = {
     PatternType.MEMENTO: {"text": "#e879f9", "bg": "#701a7544", "border": "#c026d3"},
     PatternType.VISITOR: {"text": "#f472b6", "bg": "#83184344", "border": "#db2777"},
     PatternType.INTERPRETER: {"text": "#60a5fa", "bg": "#1e3a8a44", "border": "#2563eb"},
+    PatternType.SINGLE_RESPONSIBILITY: {"text": "#818cf8", "bg": "#312e8144", "border": "#4f46e5"},
+    PatternType.OPEN_CLOSED: {"text": "#a78bfa", "bg": "#4c1d9544", "border": "#7c3aed"},
+    PatternType.LISKOV_SUBSTITUTION: {"text": "#f472b6", "bg": "#83184344", "border": "#db2777"},
+    PatternType.INTERFACE_SEGREGATION: {"text": "#38bdf8", "bg": "#0c4a6e44", "border": "#0284c7"},
+    PatternType.DEPENDENCY_INVERSION: {"text": "#34d399", "bg": "#064e3b44", "border": "#059669"},
+    PatternType.COMPOSITION_OVER_INHERITANCE: {"text": "#2dd4bf", "bg": "#134e4a44", "border": "#0d9488"},
+    PatternType.LAW_OF_DEMETER: {"text": "#fbbf24", "bg": "#78350f44", "border": "#d97706"},
+    PatternType.HIGH_COHESION_LOW_COUPLING: {"text": "#60a5fa", "bg": "#1e3a8a44", "border": "#2563eb"},
+    PatternType.KISS: {"text": "#a3e635", "bg": "#36531444", "border": "#65a30d"},
+    PatternType.DRY: {"text": "#e879f9", "bg": "#701a7544", "border": "#c026d3"},
 }
 
 
