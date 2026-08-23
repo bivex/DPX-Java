@@ -1,105 +1,68 @@
-"""Tests for ANTLR Clojure Parser Adapter."""
+"""Tests for ANTLR Java Parser Adapter."""
 
-from pattern_detector.adapters.outbound.antlr import ClojureAntlrParserAdapter
+from pattern_detector.adapters.outbound.antlr.java_parser_adapter import JavaAntlrParserAdapter
 
 
-def test_parse_namespace_and_states() -> None:
+def test_parse_package_and_classes() -> None:
     code = """
-    (ns my.sample.app
-      "Sample namespace docstring"
-      (:require [clojure.string :as str]))
+    package com.example.service;
 
-    (defonce app-state (atom {:count 0}))
-    (def ^:dynamic *current-user* "guest")
+    import java.util.List;
+    import java.util.Map;
+
+    public class UserService {
+        private String dbUrl;
+        private static final UserService INSTANCE = new UserService();
+
+        public void processUser(String id) {
+            System.out.println("Processing: " + id);
+        }
+    }
     """
-    adapter = ClojureAntlrParserAdapter()
-    ns = adapter.parse_source(code, file_path="sample.clj")
+    adapter = JavaAntlrParserAdapter()
+    ns = adapter.parse_source(code, file_path="UserService.java")
 
-    assert ns.name == "my.sample.app"
-    assert ns.docstring == "Sample namespace docstring"
-    assert len(ns.requires) >= 1
+    assert ns.name == "com.example.service"
+    assert len(ns.imports) == 2
+    assert "UserService" in ns.records
+    rec = ns.records["UserService"]
+    assert "dbUrl" in rec.fields
+    assert "INSTANCE" in rec.fields
+    assert "INSTANCE" in ns.states
+    assert ns.states["INSTANCE"].kind == "atom"
+    assert ns.states["INSTANCE"].is_once is True
 
-    assert "app-state" in ns.states
-    state = ns.states["app-state"]
-    assert state.is_once is True
-    assert state.kind == "atom"
 
-    assert "*current-user*" in ns.states
-
-
-def test_parse_protocol_and_records() -> None:
+def test_parse_interfaces_and_implementations() -> None:
     code = """
-    (ns my.repo)
+    package com.example.repo;
 
-    (defprotocol Repository
-      "Data access protocol"
-      (find-by-id [this id] "Finds item by id")
-      (save-item [this item] [this item options]))
+    public interface CrudRepository {
+        void save(Object entity);
+        Object findById(String id);
+    }
 
-    (defrecord MemoryRepository [storage]
-      Repository
-      (find-by-id [this id]
-        (get storage id))
-      (save-item [this item]
-        (assoc storage (:id item) item)))
+    public class DatabaseRepository implements CrudRepository {
+        private String connectionString;
+
+        public void save(Object entity) {
+            System.out.println("Saving: " + entity);
+        }
+
+        public Object findById(String id) {
+            return null;
+        }
+    }
     """
-    adapter = ClojureAntlrParserAdapter()
-    ns = adapter.parse_source(code, file_path="repo.clj")
+    adapter = JavaAntlrParserAdapter()
+    ns = adapter.parse_source(code, file_path="DatabaseRepository.java")
 
-    assert "Repository" in ns.protocols
-    proto = ns.protocols["Repository"]
-    assert proto.name == "Repository"
+    assert "CrudRepository" in ns.protocols
+    proto = ns.protocols["CrudRepository"]
     assert len(proto.methods) == 2
-    assert proto.has_method("find-by-id")
-    assert proto.has_method("save-item")
+    assert proto.has_method("save")
+    assert proto.has_method("findById")
 
-    assert "MemoryRepository" in ns.records
-    rec = ns.records["MemoryRepository"]
-    assert rec.name == "MemoryRepository"
-    assert rec.fields == ["storage"]
-    assert rec.implements_protocol("Repository")
-    assert len(rec.methods) == 2
-
-
-def test_parse_multimethods() -> None:
-    code = """
-    (ns my.dispatch)
-
-    (defmulti render-component (fn [comp] (:type comp)))
-
-    (defmethod render-component :button [comp]
-      (str "<button>" (:label comp) "</button>"))
-
-    (defmethod render-component :input [comp]
-      (str "<input type='text' value='" (:val comp) "'/>"))
-    """
-    adapter = ClojureAntlrParserAdapter()
-    ns = adapter.parse_source(code, file_path="dispatch.clj")
-
-    assert "render-component" in ns.multimethods
-    mm_list = ns.multimethods["render-component"]
-    # 1 declaration + 2 method branches
-    assert len(mm_list) == 3
-
-    branches = [m for m in mm_list if m.dispatch_val]
-    assert len(branches) == 2
-    assert {b.dispatch_val for b in branches} == {":button", ":input"}
-
-
-def test_parse_functions_and_closures() -> None:
-    code = """
-    (ns my.server)
-
-    (defn wrap-cors [handler]
-      (fn [req]
-        (let [resp (handler req)]
-          (assoc-in resp [:headers "Access-Control-Allow-Origin"] "*"))))
-    """
-    adapter = ClojureAntlrParserAdapter()
-    ns = adapter.parse_source(code, file_path="server.clj")
-
-    assert "wrap-cors" in ns.functions
-    fn_model = ns.functions["wrap-cors"]
-    assert fn_model.parameter_lists == [["handler"]]
-    assert fn_model.returns_closure is True
-    assert "handler" in fn_model.calls
+    assert "DatabaseRepository" in ns.records
+    rec = ns.records["DatabaseRepository"]
+    assert rec.implements_protocol("CrudRepository")

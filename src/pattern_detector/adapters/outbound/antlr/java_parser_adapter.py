@@ -31,6 +31,7 @@ class _JavaAstExtractionVisitor(JavaParserVisitor):
         self.file_path = file_path
         self.source_code = source_code
         self.package_name = "default"
+        self.requires: list[str] = []
         self.imports: list[str] = []
         self.protocols: dict[str, ProtocolModel] = {}
         self.records: dict[str, RecordModel] = {}
@@ -66,7 +67,15 @@ class _JavaAstExtractionVisitor(JavaParserVisitor):
 
     def visitImportDeclaration(self, ctx: JavaParser.ImportDeclarationContext) -> Any:
         if ctx.qualifiedName():
-            self.imports.append(ctx.qualifiedName().getText())
+            imp_text = ctx.qualifiedName().getText()
+            self.imports.append(imp_text)
+            # Add package dependency for cross-module graph analysis
+            if "." in imp_text:
+                pkg = ".".join(imp_text.split(".")[:-1])
+                if pkg not in self.requires:
+                    self.requires.append(pkg)
+            else:
+                self.requires.append(imp_text)
         return self.visitChildren(ctx)
 
     def visitInterfaceDeclaration(self, ctx: JavaParser.InterfaceDeclarationContext) -> Any:
@@ -79,11 +88,17 @@ class _JavaAstExtractionVisitor(JavaParserVisitor):
                 if member.interfaceMemberDeclaration() and member.interfaceMemberDeclaration().interfaceMethodDeclaration():
                     m_ctx = member.interfaceMemberDeclaration().interfaceMethodDeclaration()
                     m_name = m_ctx.interfaceCommonBodyDeclaration().identifier().getText() if m_ctx.interfaceCommonBodyDeclaration().identifier() else "unknown"
-                    param_count = 0
+                    param_names: list[str] = []
                     params_ctx = m_ctx.interfaceCommonBodyDeclaration().formalParameters()
                     if params_ctx and params_ctx.formalParameterList():
-                        param_count = len(params_ctx.formalParameterList().formalParameter()) + (1 if params_ctx.formalParameterList().lastFormalParameter() else 0)
-                    methods.append(MethodSignature(name=m_name, parameter_lists=[["arg"] * param_count], location=self._get_location(m_ctx)))
+                        fpl_items = params_ctx.formalParameterList() if isinstance(params_ctx.formalParameterList(), list) else [params_ctx.formalParameterList()]
+                        for fpl in fpl_items:
+                            if hasattr(fpl, "formalParameter"):
+                                fps = fpl.formalParameter() if isinstance(fpl.formalParameter(), list) else [fpl.formalParameter()]
+                                for p in fps:
+                                    if p and hasattr(p, "variableDeclaratorId") and p.variableDeclaratorId():
+                                        param_names.append(p.variableDeclaratorId().getText())
+                    methods.append(MethodSignature(name=m_name, parameter_lists=[param_names], location=self._get_location(m_ctx)))
 
         self.protocols[iface_name] = ProtocolModel(
             name=iface_name,
@@ -157,10 +172,15 @@ class _JavaAstExtractionVisitor(JavaParserVisitor):
                         m_loc = self._get_location(m_ctx)
                         m_body = self._get_text(m_ctx.methodBody()) if m_ctx.methodBody() else ""
 
-                        param_names: list[str] = []
+                        param_names = []
                         if m_ctx.formalParameters() and m_ctx.formalParameters().formalParameterList():
-                            for p in m_ctx.formalParameters().formalParameterList().formalParameter():
-                                param_names.append(p.variableDeclaratorId().getText())
+                            fpl_items = m_ctx.formalParameters().formalParameterList() if isinstance(m_ctx.formalParameters().formalParameterList(), list) else [m_ctx.formalParameters().formalParameterList()]
+                            for fpl in fpl_items:
+                                if hasattr(fpl, "formalParameter"):
+                                    fps = fpl.formalParameter() if isinstance(fpl.formalParameter(), list) else [fpl.formalParameter()]
+                                    for p in fps:
+                                        if p and hasattr(p, "variableDeclaratorId") and p.variableDeclaratorId():
+                                            param_names.append(p.variableDeclaratorId().getText())
 
                         # Identify called methods in body
                         calls = set(re.findall(r"\b([a-zA-Z_][a-zA-Z0-9_]*)\s*\(", m_body))
@@ -175,7 +195,7 @@ class _JavaAstExtractionVisitor(JavaParserVisitor):
                             location=m_loc,
                             parameter_lists=[param_names],
                             body_text=m_body,
-                            calls=calls,
+                            calls=sorted(calls),
                             docstring="",
                             is_private=is_private,
                         )
@@ -223,6 +243,7 @@ class JavaAntlrParserAdapter(ParserPort):
             name=visitor.package_name,
             file_path=file_path,
             docstring="",
+            requires=visitor.requires,
             imports=visitor.imports,
             protocols=visitor.protocols,
             records=visitor.records,

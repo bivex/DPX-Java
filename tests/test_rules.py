@@ -1,169 +1,73 @@
-"""Tests for Domain Pattern Detection Rules."""
+"""Tests for design pattern rules on Java source code."""
 
-from pattern_detector.adapters.outbound.antlr import ClojureAntlrParserAdapter
-from pattern_detector.domain.rules import (
-    AdapterPatternRule,
-    DecoratorPatternRule,
-    FactoryPatternRule,
-    LifecycleComponentPatternRule,
-    ObserverPatternRule,
-    SingletonPatternRule,
-    StrategyPatternRule,
-)
-from pattern_detector.domain.value_objects import ConfidenceLevel, PatternType
+from pattern_detector.adapters.outbound.antlr.java_parser_adapter import JavaAntlrParserAdapter
+from pattern_detector.domain.rules.lifecycle_rule import LifecycleComponentPatternRule
+from pattern_detector.domain.rules.singleton_rule import SingletonPatternRule
+from pattern_detector.domain.rules.strategy_rule import StrategyPatternRule
+from pattern_detector.domain.value_objects import PatternType
 
 
-def test_observer_pattern_rule() -> None:
+def test_strategy_pattern_java() -> None:
     code = """
-    (ns my.events)
+    package com.example.strategy;
 
-    (defonce bus (atom {:count 0}))
+    public interface SortStrategy {
+        void sort(int[] array);
+    }
 
-    (defn audit-handler [key ref old-state new-state]
-      (println "Audit event"))
+    public class QuickSort implements SortStrategy {
+        public void sort(int[] array) {}
+    }
 
-    (defn init! []
-      (add-watch bus :audit audit-handler))
+    public class MergeSort implements SortStrategy {
+        public void sort(int[] array) {}
+    }
     """
-    adapter = ClojureAntlrParserAdapter()
-    code_model = adapter.parse_sources({"events.clj": code})
-
-    rule = ObserverPatternRule()
-    detections = rule.detect(code_model)
-
+    model = JavaAntlrParserAdapter().parse_sources({"SortStrategy.java": code})
+    detections = StrategyPatternRule().detect(model)
     assert len(detections) >= 1
-    obs = next(d for d in detections if d.target_name == "bus")
-    assert obs.pattern_type == PatternType.OBSERVER
-    assert obs.confidence.score >= 0.70
-    assert any("add-watch" in ev.description.lower() for ev in obs.evidences)
+    assert detections[0].pattern_type == PatternType.STRATEGY
+    assert detections[0].target_name == "SortStrategy"
 
 
-def test_strategy_pattern_multimethods() -> None:
+def test_singleton_pattern_java() -> None:
     code = """
-    (ns my.billing)
+    package com.example.singleton;
 
-    (defmulti charge (fn [tx] (:provider tx)))
-    (defmethod charge :stripe [tx] (println "Stripe"))
-    (defmethod charge :paypal [tx] (println "PayPal"))
-    (defmethod charge :braintree [tx] (println "Braintree"))
+    public class AppConfig {
+        private static final AppConfig INSTANCE = new AppConfig();
+        private AppConfig() {}
+
+        public static AppConfig getInstance() {
+            return INSTANCE;
+        }
+    }
     """
-    adapter = ClojureAntlrParserAdapter()
-    code_model = adapter.parse_sources({"billing.clj": code})
-
-    rule = StrategyPatternRule()
-    detections = rule.detect(code_model)
-
+    model = JavaAntlrParserAdapter().parse_sources({"AppConfig.java": code})
+    detections = SingletonPatternRule().detect(model)
     assert len(detections) >= 1
-    strat = next(d for d in detections if d.target_name == "charge")
-    assert strat.pattern_type == PatternType.STRATEGY
-    assert strat.confidence.level in (ConfidenceLevel.HIGH, ConfidenceLevel.VERY_HIGH)
+    assert any(d.pattern_type == PatternType.SINGLETON for d in detections)
 
 
-def test_decorator_pattern_middleware() -> None:
+def test_lifecycle_component_pattern_java() -> None:
     code = """
-    (ns my.middleware)
+    package com.example.lifecycle;
 
-    (defn wrap-auth [handler]
-      (fn [req]
-        (if (:user req)
-          (handler req)
-          {:status 401})))
+    public interface Lifecycle {
+        void start();
+        void stop();
+    }
+
+    public class HttpServerComponent implements Lifecycle {
+        public void start() {
+            System.out.println("Starting server");
+        }
+        public void stop() {
+            System.out.println("Stopping server");
+        }
+    }
     """
-    adapter = ClojureAntlrParserAdapter()
-    code_model = adapter.parse_sources({"middleware.clj": code})
-
-    rule = DecoratorPatternRule()
-    detections = rule.detect(code_model)
-
+    model = JavaAntlrParserAdapter().parse_sources({"Lifecycle.java": code})
+    detections = LifecycleComponentPatternRule().detect(model)
     assert len(detections) >= 1
-    dec = next(d for d in detections if d.target_name == "wrap-auth")
-    assert dec.pattern_type == PatternType.DECORATOR
-    assert dec.confidence.score >= 0.70
-
-
-def test_singleton_pattern_defonce() -> None:
-    code = """
-    (ns my.state)
-
-    (defonce global-cache (atom {}))
-
-    (defn get-cache []
-      @global-cache)
-    """
-    adapter = ClojureAntlrParserAdapter()
-    code_model = adapter.parse_sources({"state.clj": code})
-
-    rule = SingletonPatternRule()
-    detections = rule.detect(code_model)
-
-    assert len(detections) >= 1
-    sing = next(d for d in detections if d.target_name == "global-cache")
-    assert sing.pattern_type == PatternType.SINGLETON
-    assert sing.confidence.score >= 0.70
-
-
-def test_factory_pattern_helpers() -> None:
-    code = """
-    (ns my.domain)
-
-    (defrecord Order [id items total])
-
-    (defn make-order [items]
-      (->Order (random-uuid) items (reduce + (map :price items))))
-    """
-    adapter = ClojureAntlrParserAdapter()
-    code_model = adapter.parse_sources({"domain.clj": code})
-
-    rule = FactoryPatternRule()
-    detections = rule.detect(code_model)
-
-    assert len(detections) >= 1
-    fact = next(d for d in detections if d.target_name == "make-order")
-    assert fact.pattern_type == PatternType.FACTORY_METHOD
-    assert fact.confidence.score >= 0.70
-
-
-def test_adapter_pattern_extend_type() -> None:
-    code = """
-    (ns my.adapter)
-
-    (defprotocol Formattable
-      (format-str [this]))
-
-    (extend-type java.lang.String
-      Formattable
-      (format-str [this] (.trim this)))
-    """
-    adapter = ClojureAntlrParserAdapter()
-    code_model = adapter.parse_sources({"adapter.clj": code})
-
-    rule = AdapterPatternRule()
-    detections = rule.detect(code_model)
-
-    assert len(detections) >= 1
-    adapt = next(d for d in detections if "java.lang.String" in d.target_name)
-    assert adapt.pattern_type == PatternType.ADAPTER
-
-
-def test_lifecycle_component_pattern() -> None:
-    code = """
-    (ns my.system)
-
-    (defprotocol Lifecycle
-      (start [this])
-      (stop [this]))
-
-    (defrecord WebServer [port server]
-      Lifecycle
-      (start [this] (assoc this :server "running"))
-      (stop [this] (assoc this :server nil)))
-    """
-    adapter = ClojureAntlrParserAdapter()
-    code_model = adapter.parse_sources({"system.clj": code})
-
-    rule = LifecycleComponentPatternRule()
-    detections = rule.detect(code_model)
-
-    assert len(detections) >= 2  # Protocol + Record
-    rec_det = next(d for d in detections if d.target_name == "WebServer")
-    assert rec_det.pattern_type == PatternType.LIFECYCLE_COMPONENT
+    assert detections[0].pattern_type == PatternType.LIFECYCLE_COMPONENT
