@@ -26,7 +26,7 @@ class LawOfDemeterRule(BasePatternRule):
     def detect(self, model: CodeModel) -> list[Detection]:
         detections: list[Detection] = []
 
-        # Fluent / Stream API method exclusions
+        # Fluent / Stream / String / Collection / Time API exclusions
         fluent_keywords = {
             "stream", "filter", "map", "flatmap", "collect", "reduce", "foreach", "findfirst", "findany",
             "builder", "build", "append", "then", "tostring", "trim", "strip", "substring", "replace",
@@ -34,7 +34,11 @@ class LawOfDemeterRule(BasePatternRule):
             "when", "thenreturn", "thenthrow", "verify", "assertthat", "isequalto", "isnotnull", "istrue",
             "status", "header", "headers", "body", "ok", "badrequest", "created", "accepted", "notfound",
             "add", "multiply", "divide", "subtract", "setscale", "plus", "minus", "now", "of", "format",
-            "parse", "join", "equals", "hashcode", "compareto",
+            "parse", "join", "equals", "hashcode", "compareto", "contains", "contentequals", "startswith",
+            "endswith", "matches", "indexof", "length", "isempty", "isblank", "isafter", "isbefore",
+            "isequal", "iterator", "next", "hasnext", "getclass", "getname", "getsimplename",
+            "tolowercase", "touppercase", "addall", "put", "putall", "remove", "clear", "resources",
+            "registerpattern", "registerhints", "registertype",
         }
 
         for fn in model.all_functions():

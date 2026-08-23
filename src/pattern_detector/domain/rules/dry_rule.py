@@ -28,6 +28,9 @@ class DryRule(BasePatternRule):
         body_map: dict[str, list[tuple[str, Any]]] = {}
 
         for fn in model.all_functions():
+            simple_name = fn.name.split(".")[-1]
+            if simple_name in ("toString", "hashCode", "equals", "compareTo"):
+                continue
             body = (fn.body_text or "").strip()
             # Normalize whitespace and comments
             norm_body = re.sub(r"\s+", " ", re.sub(r"//.*", "", body)).strip()
@@ -36,9 +39,18 @@ class DryRule(BasePatternRule):
                 body_map.setdefault(norm_body, []).append((fn.name, fn.location))
 
         for norm_body, instances in body_map.items():
-            if len(instances) >= 2:
-                names = [name for name, _ in instances]
-                locs = [loc for _, loc in instances]
+            # Deduplicate same location / method occurrences
+            unique_instances = []
+            seen_locs = set()
+            for name, loc in instances:
+                loc_key = (name, loc.file_path, loc.line)
+                if loc_key not in seen_locs:
+                    seen_locs.add(loc_key)
+                    unique_instances.append((name, loc))
+
+            if len(unique_instances) >= 2:
+                names = [name for name, _ in unique_instances]
+                locs = [loc for _, loc in unique_instances]
                 evidences = [
                     self.evidence(
                         description=f"Identical duplicate code logic detected across {len(instances)} methods: {', '.join(names)}",
