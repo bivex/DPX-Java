@@ -38,7 +38,7 @@ class PatternDetectorService:
         # Sort detections by confidence score descending
         all_detections.sort(key=lambda d: d.confidence.score, reverse=True)
 
-        scanned_files_count = len(model.namespaces)
+        scanned_files_count = len(model.all_file_paths()) or len(model.namespaces)
 
         return DetectionReport(
             project_path=project_path,

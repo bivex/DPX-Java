@@ -116,6 +116,15 @@ class _JavaAstExtractionVisitor(JavaParserVisitor):
         fields: list[str] = []
         class_methods: list[FunctionModel] = []
 
+        parent_decl = ctx.parentCtx
+        is_abstract = False
+        if parent_decl and hasattr(parent_decl, "classOrInterfaceModifier"):
+            mods = parent_decl.classOrInterfaceModifier()
+            if isinstance(mods, list):
+                is_abstract = any(m.getText() == "abstract" for m in mods)
+            elif mods:
+                is_abstract = mods.getText() == "abstract"
+
         # Implemented interfaces
         if ctx.IMPLEMENTS():
             tl_list = ctx.typeList()
@@ -209,7 +218,19 @@ class _JavaAstExtractionVisitor(JavaParserVisitor):
             fields=fields,
             implemented_protocols=implements_list,
             methods=class_methods,
+            is_type=is_abstract,
         )
+
+        # If abstract class, register as polymorphic protocol for pattern detection
+        if is_abstract:
+            self.protocols[class_name] = ProtocolModel(
+                name=class_name,
+                namespace=self.package_name,
+                location=loc,
+                methods=[MethodSignature(name=m.name.split(".")[-1], location=m.location) for m in class_methods],
+                docstring="",
+            )
+
         return self.visitChildren(ctx)
 
     def visitRecordDeclaration(self, ctx: Any) -> Any:

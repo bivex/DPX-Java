@@ -40,10 +40,15 @@ class CompositePatternRule(BasePatternRule):
                     k in f for f in fields_lower
                     for k in ("children", "items", "components", "elements", "nodes", "members", "subs")
                 )
-                if is_composite or any(k in rec.name.lower() for k in ("composite", "group", "container", "panel", "tree")):
+                if is_composite or any(k in rec.name.lower() for k in ("composite", "group", "container", "panel", "tree", "compound", "sentence", "word")):
                     composite_recs.append(rec)
                 else:
                     leaf_recs.append(rec)
+
+            # If base protocol/class itself is composite (e.g. LetterComposite)
+            if not composite_recs and "composite" in proto.name.lower() and len(rec_impls) >= 2:
+                leaf_recs = [rec_impls[0]]
+                composite_recs = list(rec_impls[1:])
 
             if composite_recs and leaf_recs:
                 evidences: list[Evidence] = [

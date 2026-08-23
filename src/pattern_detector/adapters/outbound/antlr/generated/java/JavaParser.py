@@ -5740,9 +5740,9 @@ class JavaParser ( JavaParserBase ):
             if la_ == 1:
                 self.enterOuterAlt(localctx, 1)
                 self.state = 872
-                if not  this.IsNotIdentifierAssign() :
+                if not  self.IsNotIdentifierAssign() :
                     from antlr4.error.Errors import FailedPredicateException
-                    raise FailedPredicateException(self, " this.IsNotIdentifierAssign() ")
+                    raise FailedPredicateException(self, " self.IsNotIdentifierAssign() ")
                 self.state = 873
                 self.annotationValue()
                 pass
@@ -7127,9 +7127,9 @@ class JavaParser ( JavaParserBase ):
                 _alt = self._interp.adaptivePredict(self._input,127,self._ctx)
 
             self.state = 1092
-            if not  this.DoLastRecordComponent() :
+            if not  self.DoLastRecordComponent() :
                 from antlr4.error.Errors import FailedPredicateException
-                raise FailedPredicateException(self, " this.DoLastRecordComponent() ")
+                raise FailedPredicateException(self, " self.DoLastRecordComponent() ")
         except RecognitionException as re:
             localctx.exception = re
             self._errHandler.reportError(self, re)
@@ -12417,12 +12417,12 @@ class JavaParser ( JavaParserBase ):
 
     def annotationFieldValue_sempred(self, localctx:AnnotationFieldValueContext, predIndex:int):
             if predIndex == 0:
-                return  this.IsNotIdentifierAssign() 
+                return  self.IsNotIdentifierAssign() 
          
 
     def recordComponentList_sempred(self, localctx:RecordComponentListContext, predIndex:int):
             if predIndex == 1:
-                return  this.DoLastRecordComponent() 
+                return  self.DoLastRecordComponent() 
          
 
     def expression_sempred(self, localctx:ExpressionContext, predIndex:int):

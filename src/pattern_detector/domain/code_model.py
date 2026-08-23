@@ -166,10 +166,39 @@ class CodeModel:
     namespaces: dict[str, NamespaceModel] = field(default_factory=dict)
 
     def add_namespace(self, ns: NamespaceModel) -> None:
-        self.namespaces[ns.name] = ns
+        if ns.name in self.namespaces:
+            existing = self.namespaces[ns.name]
+            existing.requires.extend([r for r in ns.requires if r not in existing.requires])
+            existing.imports.extend([i for i in ns.imports if i not in existing.imports])
+            existing.protocols.update(ns.protocols)
+            existing.records.update(ns.records)
+            existing.extensions.extend(ns.extensions)
+            existing.functions.update(ns.functions)
+            for k, v in ns.multimethods.items():
+                existing.multimethods.setdefault(k, []).extend(v)
+            existing.states.update(ns.states)
+            existing.watches.extend(ns.watches)
+        else:
+            self.namespaces[ns.name] = ns
 
     def get_namespace(self, name: str) -> NamespaceModel | None:
         return self.namespaces.get(name)
+
+    def all_file_paths(self) -> set[str]:
+        files: set[str] = set()
+        for ns in self.namespaces.values():
+            if ns.file_path:
+                files.add(ns.file_path)
+            for r in ns.records.values():
+                if r.location and r.location.file_path:
+                    files.add(r.location.file_path)
+            for p in ns.protocols.values():
+                if p.location and p.location.file_path:
+                    files.add(p.location.file_path)
+            for f in ns.functions.values():
+                if f.location and f.location.file_path:
+                    files.add(f.location.file_path)
+        return files
 
     def all_functions(self) -> list[FunctionModel]:
         res: list[FunctionModel] = []
