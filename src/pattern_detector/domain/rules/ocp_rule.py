@@ -30,6 +30,8 @@ class OpenClosedPrincipleRule(BasePatternRule):
 
         # 1. Detect instanceof cascades inside method bodies (OCP Violations)
         for fn in model.all_functions():
+            if fn.location.is_test_location or fn.is_test:
+                continue
             if fn.name.split(".")[-1] in ("equals", "compareTo", "toString", "hashCode"):
                 continue
             body = fn.body_text or ""

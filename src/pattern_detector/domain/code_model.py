@@ -60,6 +60,15 @@ class FunctionModel:
     def qualified_name(self) -> str:
         return f"{self.namespace}/{self.name}" if self.namespace else self.name
 
+    @property
+    def is_test(self) -> bool:
+        simple = self.name.split(".")[-1].lower()
+        return (
+            self.location.is_test_location
+            or simple.startswith(("test", "should", "verify", "assert"))
+            or "@Test" in (self.metadata.get("annotations") or "")
+        )
+
 
 @dataclass
 class ProtocolModel:
@@ -76,6 +85,10 @@ class ProtocolModel:
     def qualified_name(self) -> str:
         return f"{self.namespace}/{self.name}" if self.namespace else self.name
 
+    @property
+    def is_interface(self) -> bool:
+        return self.metadata.get("is_interface", "true").lower() == "true"
+
     def has_method(self, name: str) -> bool:
         return any(m.name == name for m in self.methods)
 
@@ -88,6 +101,7 @@ class RecordModel:
     namespace: str
     location: SourceLocation
     fields: list[str] = field(default_factory=list)
+    field_types: dict[str, str] = field(default_factory=dict)
     implemented_protocols: list[str] = field(default_factory=list)
     methods: list[FunctionModel] = field(default_factory=list)
     is_type: bool = False
@@ -96,6 +110,13 @@ class RecordModel:
     @property
     def qualified_name(self) -> str:
         return f"{self.namespace}/{self.name}" if self.namespace else self.name
+
+    @property
+    def is_test(self) -> bool:
+        return (
+            self.location.is_test_location
+            or self.name.endswith(("Test", "Tests", "TestCase", "IT"))
+        )
 
     def implements_protocol(self, protocol_name: str) -> bool:
         norm = protocol_name.split("/")[-1]

@@ -30,12 +30,19 @@ class DependencyInversionRule(BasePatternRule):
         protocols_names = {p.name for p in model.all_protocols()}
 
         for rec in model.all_records():
+            if rec.is_test:
+                continue
             # Check fields and constructor injection
             interface_deps: list[str] = []
             for f in rec.fields:
-                # If a field name matches an interface name or convention
+                f_type = rec.field_types.get(f, "")
+                # If a field name or type matches an interface name or convention
                 for proto_name in protocols_names:
-                    if proto_name.lower() in f.lower() or f.lower() in proto_name.lower():
+                    if (
+                        proto_name.lower() in f.lower()
+                        or f.lower() in proto_name.lower()
+                        or (f_type and (proto_name.lower() in f_type.lower() or f_type.lower() in proto_name.lower()))
+                    ):
                         interface_deps.append(proto_name)
 
             # Check direct new instantiation of low-level dependencies inside methods

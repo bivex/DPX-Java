@@ -28,22 +28,30 @@ class LawOfDemeterRule(BasePatternRule):
     def detect(self, model: CodeModel) -> list[Detection]:
         detections: list[Detection] = []
 
-        # Fluent / Stream / String / Collection / Time API exclusions
+        # Fluent / Stream / String / Collection / Time / Web / Regex / Logging API exclusions
         fluent_keywords = {
             "stream", "filter", "map", "flatmap", "collect", "reduce", "foreach", "findfirst", "findany",
             "builder", "build", "append", "then", "tostring", "trim", "strip", "substring", "replace",
             "valueof", "ofnullable", "orelse", "orelseget", "orelsethrow", "ifpresent", "ispresent",
-            "when", "thenreturn", "thenthrow", "verify", "assertthat", "isequalto", "isnotnull", "istrue",
+            "when", "thenreturn", "thenthrow", "verify", "assertthat", "isequalto", "isnotequalto", "isnotnull", "isnull", "istrue", "isfalse",
             "status", "header", "headers", "body", "ok", "badrequest", "created", "accepted", "notfound",
             "add", "multiply", "divide", "subtract", "setscale", "plus", "minus", "now", "of", "format",
             "parse", "join", "equals", "hashcode", "compareto", "contains", "contentequals", "startswith",
             "endswith", "matches", "indexof", "length", "isempty", "isblank", "isafter", "isbefore",
-            "isequal", "iterator", "next", "hasnext", "getclass", "getname", "getsimplename",
+            "isequal", "iterator", "next", "hasnext", "getclass", "getname", "getsimplename", "getcanonicalname",
             "tolowercase", "touppercase", "addall", "put", "putall", "remove", "clear", "resources",
             "registerpattern", "registerhints", "registertype",
+            "matcher", "find", "group", "start", "end", "replaceall", "replacefirst", "pattern", "compile",
+            "getstatuscode", "is2xxsuccessful", "is1xxinformational", "is3xxredirection", "is4xxclienterror", "is5xxservererror", "iserror",
+            "getbody", "getheaders", "getresponse", "getrequest", "getattribute", "getattributes", "getparameter", "getparameters",
+            "getlogger", "getdeclaredfield", "getdeclaredmethod", "getmethod", "getfield", "info", "debug", "warn", "error", "trace",
+            "isok", "iszero", "hastotsize", "containskey", "containsvalue", "extracting", "returns", "expect", "print",
         }
 
         for fn in model.all_functions():
+            if fn.location.is_test_location or fn.is_test:
+                continue
+
             body = fn.body_text or ""
             # Look for expressions with chained method invocations: expr.m1().m2().m3()
             matches = _CHAIN_CALL_RE.finditer(body)

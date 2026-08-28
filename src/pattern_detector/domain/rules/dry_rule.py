@@ -31,6 +31,8 @@ class DryRule(BasePatternRule):
         body_map: dict[str, list[tuple[str, Any]]] = {}
 
         for fn in model.all_functions():
+            if fn.location.is_test_location or fn.is_test:
+                continue
             simple_name = fn.name.split(".")[-1]
             if simple_name in ("toString", "hashCode", "equals", "compareTo"):
                 continue

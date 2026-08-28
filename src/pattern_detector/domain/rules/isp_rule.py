@@ -25,10 +25,13 @@ class InterfaceSegregationRule(BasePatternRule):
         detections: list[Detection] = []
 
         for proto in model.all_protocols():
+            if proto.location.is_test_location or proto.name.endswith(("Test", "Tests", "TestCase")):
+                continue
+
             method_count = len(proto.methods)
 
-            # 1. Fat Interface Violation (>7 methods)
-            if method_count >= 8:
+            # 1. Fat Interface Violation (>7 methods) - only for actual interfaces
+            if method_count >= 8 and proto.is_interface:
                 method_names_str = ", ".join(m.name for m in proto.methods[:6]) + ("..." if method_count > 6 else "")
                 evidences = [
                     self.evidence(
@@ -57,8 +60,8 @@ class InterfaceSegregationRule(BasePatternRule):
                 detections.append(detection)
 
             # 2. Fine-Grained Role Interface Adherence (1 to 3 methods with implementing classes)
-            elif 1 <= method_count <= 3:
-                rec_impls = model.find_records_implementing(proto.name)
+            elif 1 <= method_count <= 3 and proto.is_interface:
+                rec_impls = [r for r in model.find_records_implementing(proto.name) if not r.is_test]
                 if len(rec_impls) >= 2:
                     evidences = [
                         self.evidence(

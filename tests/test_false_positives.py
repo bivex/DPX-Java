@@ -212,3 +212,98 @@ def test_string_helpers_with_make_or_create_name_not_flagged_as_factory() -> Non
         if d.pattern_type == PatternType.FACTORY_METHOD and d.confidence.level in (ConfidenceLevel.HIGH, ConfidenceLevel.VERY_HIGH)
     ]
     assert len(factory_detections) == 0
+
+
+def test_factory_and_observer_interfaces_not_falsely_flagged_as_strategy() -> None:
+    code = """
+    package com.example.patterns;
+
+    public interface WidgetFactory {
+        Widget createWidget();
+    }
+    public class SimpleWidgetFactory implements WidgetFactory {
+        public Widget createWidget() { return new Widget(); }
+    }
+    public class AdvancedWidgetFactory implements WidgetFactory {
+        public Widget createWidget() { return new AdvancedWidget(); }
+    }
+
+    public interface EventObserver {
+        void onEvent(String event);
+    }
+    public class UserObserver implements EventObserver {
+        public void onEvent(String event) {}
+    }
+    public class AuditObserver implements EventObserver {
+        public void onEvent(String event) {}
+    }
+    """
+    report = _scan_snippet({"Patterns.java": code})
+    strategy_detections = [d for d in report.detections if d.pattern_type == PatternType.STRATEGY]
+    assert len(strategy_detections) == 0
+
+
+def test_command_invoker_with_undo_not_flagged_as_memento() -> None:
+    code = """
+    package com.example.command;
+
+    import java.util.Deque;
+    import java.util.ArrayDeque;
+
+    public class CommandInvoker {
+        private Deque<Runnable> history = new ArrayDeque<>();
+
+        public void undoLastCommand() {
+            if (!history.isEmpty()) {
+                history.pop();
+            }
+        }
+
+        public void redoLastCommand() {
+        }
+    }
+    """
+    report = _scan_snippet({"CommandInvoker.java": code})
+    memento_detections = [d for d in report.detections if d.pattern_type == PatternType.MEMENTO]
+    assert len(memento_detections) == 0
+
+
+def test_instanceof_in_tests_not_flagged_as_ocp_violation() -> None:
+    code = """
+    package com.example.test;
+
+    public class SampleFactoryTest {
+        public void verifyCreation(Object obj) {
+            if (obj instanceof String) {
+                System.out.println("String");
+            } else if (obj instanceof Integer) {
+                System.out.println("Integer");
+            }
+        }
+    }
+    """
+    report = _scan_snippet({"SampleFactoryTest.java": code})
+    ocp_detections = [d for d in report.detections if d.pattern_type == PatternType.OPEN_CLOSED]
+    assert len(ocp_detections) == 0
+
+
+def test_controller_with_typed_fields_detected_for_dip() -> None:
+    code = """
+    package com.example.controller;
+
+    public interface UserRepository {
+        User findById(int id);
+    }
+
+    public class UserController {
+        private final UserRepository users;
+
+        public UserController(UserRepository users) {
+            this.users = users;
+        }
+    }
+    """
+    report = _scan_snippet({"UserController.java": code})
+    dip_detections = [d for d in report.detections if d.pattern_type == PatternType.DEPENDENCY_INVERSION]
+    assert len(dip_detections) >= 1
+    assert dip_detections[0].target_name == "UserController"

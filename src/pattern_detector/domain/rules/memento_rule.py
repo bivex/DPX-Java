@@ -24,11 +24,19 @@ class MementoPatternRule(BasePatternRule):
     def detect(self, model: CodeModel) -> list[Detection]:
         detections: list[Detection] = []
 
+        # Check if any record/protocol in the model has Memento or Snapshot in name
+        memento_types = {r.name.lower() for r in model.all_records()} | {p.name.lower() for p in model.all_protocols()}
+        has_memento_type = any("memento" in t or "snapshot" in t for t in memento_types)
+
         for ns in model.namespaces.values():
             memento_fns = []
             for fn in ns.functions.values():
+                if fn.location.is_test_location:
+                    continue
                 name_lower = fn.name.lower()
-                if any(k in name_lower for k in ("snapshot", "memento", "checkpoint", "undo", "redo", "save-state", "restore-state")):
+                is_memento_kw = any(k in name_lower for k in ("snapshot", "memento", "checkpoint", "save-state", "restore-state"))
+                is_undo_redo_with_type = has_memento_type and any(k in name_lower for k in ("undo", "redo"))
+                if is_memento_kw or is_undo_redo_with_type:
                     memento_fns.append(fn)
 
             if len(memento_fns) >= 2 or any("memento" in f.name.lower() or "snapshot" in f.name.lower() for f in memento_fns):

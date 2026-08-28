@@ -102,6 +102,16 @@ class SourceLocation:
             "formatted": str(self),
         }
 
+    @property
+    def is_test_location(self) -> bool:
+        norm = self.file_path.replace("\\", "/").lower()
+        return (
+            "/test/" in norm
+            or "/tests/" in norm
+            or "/src/test/" in norm
+            or norm.endswith(("test.java", "tests.java", "testcase.java"))
+        )
+
 
 @dataclass(frozen=True)
 class Evidence:

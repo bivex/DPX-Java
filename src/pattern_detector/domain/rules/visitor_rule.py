@@ -25,6 +25,8 @@ class VisitorPatternRule(BasePatternRule):
 
         # 1. Visitor Interfaces declaring visit(...) methods
         for proto in model.all_protocols():
+            if proto.location.is_test_location or proto.name.endswith(("Test", "Tests", "TestCase")):
+                continue
             visit_methods = [m for m in proto.methods if "visit" in m.name.lower()]
             if visit_methods and ("visitor" in proto.name.lower() or len(visit_methods) >= 2):
                 evidences: list[Evidence] = [
@@ -37,7 +39,7 @@ class VisitorPatternRule(BasePatternRule):
                 ]
 
                 # Check concrete visitor implementations
-                visitor_impls = model.find_records_implementing(proto.name)
+                visitor_impls = [r for r in model.find_records_implementing(proto.name) if not r.is_test]
                 related_locs: list[SourceLocation] = []
                 if visitor_impls:
                     impl_names = ", ".join(r.name for r in visitor_impls[:4])
@@ -65,6 +67,8 @@ class VisitorPatternRule(BasePatternRule):
 
         # 2. Element Accept Methods calling visit(this)
         for rec in model.all_records():
+            if rec.is_test:
+                continue
             accept_methods = [m for m in rec.methods if "accept" in m.name.lower()]
             for am in accept_methods:
                 body = am.body_text or ""

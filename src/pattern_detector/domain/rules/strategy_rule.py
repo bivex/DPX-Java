@@ -72,54 +72,113 @@ class StrategyPatternRule(BasePatternRule):
                 )
 
         # 2. Strategy via Protocols with multiple implementing records
+        excluded_pattern_suffixes = (
+            "Factory", "Builder", "Creator", "Producer", "Observer", "Listener",
+            "Subscriber", "Watcher", "Visitor", "Element", "State", "Iterator", "Iterable"
+        )
+
+        strategy_name_suffixes = (
+            "Strategy", "Policy", "Algorithm", "Behavior", "Action", "Rule",
+            "Processor", "Callback", "Calculator", "Operation", "Formatter",
+            "Validator", "Converter", "Matcher", "Parser", "Comparator",
+            "Predicate", "Function", "Handler", "Filter", "Mapper", "Generator", "Driver"
+        )
+
+        strategy_method_verbs = (
+            "sort", "pay", "execute", "calculate", "apply", "filter", "validate",
+            "format", "compress", "route", "process", "slay", "authenticate",
+            "handle", "run", "doaction", "match", "transform", "print", "export",
+            "render", "compute", "search", "dispatch", "evaluate", "perform"
+        )
+
         for proto in model.all_protocols():
+            if proto.location.is_test_location or proto.name.endswith(("Test", "Tests", "TestCase")):
+                continue
+
+            # Exclude other GoF pattern interfaces
+            if any(proto.name.endswith(sfx) for sfx in excluded_pattern_suffixes):
+                continue
+
+            # Check method names for factory / observer / visitor methods
+            method_names_lower = [m.name.lower() for m in proto.methods]
+            if any(m.startswith(("create", "build", "make", "new", "produce", "manufacture")) for m in method_names_lower):
+                continue
+            if any(m in ("update", "onevent", "notify", "observe", "visit", "accept", "hasnext") for m in method_names_lower):
+                continue
+
             implementing_records = model.find_records_implementing(proto.name)
             extensions = [ext for ext in model.all_extensions() if ext.protocol_name in (proto.name, proto.qualified_name)]
 
             total_implementations = len(implementing_records) + len(extensions)
-            if total_implementations >= 2:
-                evidences = [
+            if total_implementations < 2:
+                continue
+
+            # Exclude Decorators and Proxies (where an implementing class wraps another instance of the same interface)
+            is_decorator_or_proxy = False
+            for rec in implementing_records:
+                for f_name in rec.fields:
+                    f_type = rec.field_types.get(f_name, "")
+                    if proto.name.lower() in f_name.lower() or (f_type and proto.name.lower() in f_type.lower()):
+                        is_decorator_or_proxy = True
+                        break
+                if is_decorator_or_proxy:
+                    break
+            if is_decorator_or_proxy:
+                continue
+
+            # Check if interface or methods align with strategy semantics
+            is_strategy_named = any(proto.name.endswith(sfx) for sfx in strategy_name_suffixes)
+            has_strategy_method = any(
+                any(verb in m_name for verb in strategy_method_verbs)
+                for m_name in method_names_lower
+            )
+
+            # Accept if strategy naming / method verbs match or if it is a focused functional contract (1-2 methods)
+            if not (is_strategy_named or has_strategy_method or (1 <= len(proto.methods) <= 2 and proto.is_interface)):
+                continue
+
+            evidences = [
+                self.evidence(
+                    description=f"Protocol '{proto.name}' defines strategy interface with methods: {', '.join(m.name for m in proto.methods)}",
+                    weight=0.45,
+                    location=proto.location,
+                    code_suffix="PROTOCOL_STRATEGY_INTERFACE",
+                )
+            ]
+            related_locs = []
+
+            for rec in implementing_records:
+                evidences.append(
                     self.evidence(
-                        description=f"Protocol '{proto.name}' defines strategy interface with methods: {', '.join(m.name for m in proto.methods)}",
-                        weight=0.45,
-                        location=proto.location,
-                        code_suffix="PROTOCOL_STRATEGY_INTERFACE",
-                    )
-                ]
-                related_locs = []
-
-                for rec in implementing_records:
-                    evidences.append(
-                        self.evidence(
-                            description=f"Record '{rec.name}' provides concrete strategy implementation for protocol '{proto.name}'",
-                            weight=0.25,
-                            location=rec.location,
-                            code_suffix="RECORD_STRATEGY_IMPL",
-                        )
-                    )
-                    related_locs.append(rec.location)
-
-                for ext in extensions:
-                    evidences.append(
-                        self.evidence(
-                            description=f"Extension on '{ext.target_type}' implements strategy protocol '{proto.name}'",
-                            weight=0.20,
-                            location=ext.location,
-                            code_suffix="EXTENSION_STRATEGY_IMPL",
-                        )
-                    )
-                    related_locs.append(ext.location)
-
-                detections.append(
-                    self.create_detection(
-                        target_name=proto.name,
-                        target_kind="protocol_strategy",
-                        evidences=evidences,
-                        primary_location=proto.location,
-                        related_locations=related_locs,
-                        summary=f"Strategy pattern: protocol '{proto.name}' with {total_implementations} interchangeable concrete implementations",
-                        base_score=0.20,
+                        description=f"Record '{rec.name}' provides concrete strategy implementation for protocol '{proto.name}'",
+                        weight=0.25,
+                        location=rec.location,
+                        code_suffix="RECORD_STRATEGY_IMPL",
                     )
                 )
+                related_locs.append(rec.location)
+
+            for ext in extensions:
+                evidences.append(
+                    self.evidence(
+                        description=f"Extension on '{ext.target_type}' implements strategy protocol '{proto.name}'",
+                        weight=0.20,
+                        location=ext.location,
+                        code_suffix="EXTENSION_STRATEGY_IMPL",
+                    )
+                )
+                related_locs.append(ext.location)
+
+            detections.append(
+                self.create_detection(
+                    target_name=proto.name,
+                    target_kind="protocol_strategy",
+                    evidences=evidences,
+                    primary_location=proto.location,
+                    related_locations=related_locs,
+                    summary=f"Strategy pattern: protocol '{proto.name}' with {total_implementations} interchangeable concrete implementations",
+                    base_score=0.20,
+                )
+            )
 
         return detections

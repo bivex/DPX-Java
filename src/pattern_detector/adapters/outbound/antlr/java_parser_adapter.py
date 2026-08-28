@@ -106,6 +106,7 @@ class _JavaAstExtractionVisitor(JavaParserVisitor):
             location=loc,
             methods=methods,
             docstring="",
+            metadata={"is_interface": "true"},
         )
         return self.visitChildren(ctx)
 
@@ -114,6 +115,7 @@ class _JavaAstExtractionVisitor(JavaParserVisitor):
         loc = self._get_location(ctx)
         implements_list: list[str] = []
         fields: list[str] = []
+        field_types: dict[str, str] = {}
         class_methods: list[FunctionModel] = []
 
         parent_decl = ctx.parentCtx
@@ -160,20 +162,23 @@ class _JavaAstExtractionVisitor(JavaParserVisitor):
                     if mem.fieldDeclaration():
                         f_ctx = mem.fieldDeclaration()
                         f_type = f_ctx.typeType().getText() if f_ctx.typeType() else ""
-                        for var in f_ctx.variableDeclarators().variableDeclarator():
-                            f_name = var.variableDeclaratorId().getText()
-                            fields.append(f_name)
-                            # Check static singleton pattern
-                            modifiers_text = " ".join(m.getText() for m in decl.modifier()) if decl.modifier() else ""
-                            if "static" in modifiers_text and (f_type == class_name or "instance" in f_name.lower()):
-                                self.states[f_name] = StateModel(
-                                    name=f_name,
-                                    namespace=self.package_name,
-                                    location=self._get_location(var),
-                                    kind="atom",
-                                    is_once=True,
-                                    is_dynamic=True,
-                                )
+                        if f_ctx.variableDeclarators():
+                            for var in f_ctx.variableDeclarators().variableDeclarator():
+                                f_name = var.variableDeclaratorId().getText()
+                                fields.append(f_name)
+                                if f_type:
+                                    field_types[f_name] = f_type
+                                # Check static singleton pattern
+                                modifiers_text = " ".join(m.getText() for m in decl.modifier()) if decl.modifier() else ""
+                                if "static" in modifiers_text and (f_type == class_name or "instance" in f_name.lower()):
+                                    self.states[f_name] = StateModel(
+                                        name=f_name,
+                                        namespace=self.package_name,
+                                        location=self._get_location(var),
+                                        kind="atom",
+                                        is_once=True,
+                                        is_dynamic=True,
+                                    )
                     # Method
                     elif mem.methodDeclaration():
                         m_ctx = mem.methodDeclaration()
@@ -216,6 +221,7 @@ class _JavaAstExtractionVisitor(JavaParserVisitor):
             namespace=self.package_name,
             location=loc,
             fields=fields,
+            field_types=field_types,
             implemented_protocols=implements_list,
             methods=class_methods,
             is_type=is_abstract,
@@ -229,6 +235,7 @@ class _JavaAstExtractionVisitor(JavaParserVisitor):
                 location=loc,
                 methods=[MethodSignature(name=m.name.split(".")[-1], location=m.location) for m in class_methods],
                 docstring="",
+                metadata={"is_interface": "false", "is_abstract_class": "true"},
             )
 
         return self.visitChildren(ctx)
